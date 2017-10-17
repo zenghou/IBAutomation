@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/IBSample.iml" filepath="$PROJECT_DIR$/IBSample.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Stock Strategies/twsapi_macunix/IBJts/source/JavaClient/com/ib/ib.iml" filepath="$PROJECT_DIR$/../Stock Strategies/twsapi_macunix/IBJts/source/JavaClient/com/ib/ib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Stock Strategies/twsapi_macunix/IBJts/samples/Java/samples/samples.iml" filepath="$PROJECT_DIR$/../Stock Strategies/twsapi_macunix/IBJts/samples/Java/samples/samples.iml" />
+    </modules>
+  </component>
+</project>
