@@ -19,7 +19,7 @@ import samples.testbed.orders.OrderSamples;
 import samples.testbed.scanner.ScannerSubscriptionSamples;
 import samples.testbed.ewrapper.EWrapperImpl;
 
-public class MainApp {
+public class TestBed {
 
 	public static void main(String[] args) throws InterruptedException {
 		EWrapperImpl wrapper = new EWrapperImpl();
@@ -49,7 +49,8 @@ public class MainApp {
 		// In a production application, it would be best to wait for callbacks to confirm the connection is complete
 		Thread.sleep(1000);
 
-		//tickDataOperations(wrapper.getClient());
+		// tickDataOperations(wrapper.getClient());
+		realTimeBars(wrapper.getClient());
 		// orderOperations(wrapper.getClient(), wrapper.getCurrentOrderId());
 		//contractOperations(wrapper.getClient());
 		//hedgeSample(wrapper.getClient(), wrapper.getCurrentOrderId());
@@ -58,7 +59,7 @@ public class MainApp {
 		//bulletins(wrapper.getClient());
 		//reutersFundamentals(wrapper.getClient());
 		//marketDataType(wrapper.getClient());
-		historicalDataRequests(wrapper.getClient());
+		// historicalDataRequests(wrapper.getClient());
 		//accountOperations(wrapper.getClient());
 		//newsOperations(wrapper.getClient());
 		//marketDepthOperations(wrapper.getClient());
@@ -70,7 +71,7 @@ public class MainApp {
 		//pnlSingle(wrapper.getClient());
 		//histogram(wrapper.getClient());
 
-        System.out.println("This is a fking random calculation" + wrapper.listOfShortListedStocks.get(1).getRandomCalculation());
+        // System.out.println("This is a fking random calculation" + wrapper.listOfShortListedStocks.get(1).getRandomCalculation());
 
 		Thread.sleep(100000);
 		m_client.eDisconnect();
@@ -226,10 +227,10 @@ public class MainApp {
 		/*** Requesting real time market data ***/
 		//Thread.sleep(1000);
 		//! [reqmktdata]
-		client.reqMktData(1001, ContractSamples.StockComboContract(), "", false, false, null);
+		client.reqMktData(1001, ContractSamples.USStockWithPrimaryExch(), "", false, false, null);
 		//! [reqmktdata]
 
-		//! [reqsmartcomponents]
+/*		//! [reqsmartcomponents]
 		client.reqSmartComponents(1013, "a6");
 		//! [reqsmartcomponents]
 
@@ -237,12 +238,12 @@ public class MainApp {
 		client.reqMktData(1003, ContractSamples.FutureComboContract(), "", true, false, null);
 		//! [reqmktdata_snapshot]
 
-		/* 
+		*//*
 		//! [regulatorysnapshot] 
 		// Each regulatory snapshot request incurs a 0.01 USD fee
 		client.reqMktData(1014, ContractSamples.USStock(), "", false, true, null);
 		//! [regulatorysnapshot]
-		*/
+		*//*
 		
 		//! [reqmktdata_genticks]
 		//Requesting RTVolume (Time & Sales), shortable and Fundamental Ratios generic ticks
@@ -273,15 +274,15 @@ public class MainApp {
 		//! [reqmktdata_preopenbidask]
         //Requesting data for a futures contract will return the pre-open bid/ask flag
         client.reqMktData(1015, ContractSamples.SimpleFuture(), "", false, false, null);
-		//! [reqmktData_preopenbidask]
+		//! [reqmktData_preopenbidask]*/
         
 		Thread.sleep(10000);
 		//! [cancelmktdata]
-		client.cancelMktData(1001);
-		client.cancelMktData(1002);
+		// client.cancelMktData(1001);
+		/*client.cancelMktData(1002);
 		client.cancelMktData(1003);
 		client.cancelMktData(1014);
-		client.cancelMktData(1015);
+		client.cancelMktData(1015);*/
 		//! [cancelmktdata]
 		
 	}
@@ -325,12 +326,13 @@ public class MainApp {
 		
 		/*** Requesting real time bars ***/
         //! [reqrealtimebars]
-        client.reqRealTimeBars(3001, ContractSamples.EurGbpFx(), 5, "MIDPOINT", true, null);
+        client.reqRealTimeBars(3001, ContractSamples.USStockWithPrimaryExch(), 5, "MIDPOINT", true, null);
+        client.reqRealTimeBars(300, ContractSamples.USStockWithPrimaryExchTwo(), 5, "MIDPOINT", true, null);
         //! [reqrealtimebars]
         Thread.sleep(2000);
         /*** Canceling real time bars ***/
         //! [cancelrealtimebars]
-        client.cancelRealTimeBars(3001);
+        // client.cancelRealTimeBars(3001);
         //! [cancelrealtimebars]
 		
 	}
