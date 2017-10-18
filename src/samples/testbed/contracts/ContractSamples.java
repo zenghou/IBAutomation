@@ -11,7 +11,21 @@ public class ContractSamples {
 	public static Contract USStockWithPrimaryExch() {
 		//! [stkcontractwithprimary]
 		Contract contract = new Contract();
-		contract.symbol("MSFT");
+		contract.symbol("NFLX");
+		contract.secType("STK");
+		contract.currency("USD");
+		contract.exchange("SMART");
+		// Specify the Primary Exchange attribute to avoid contract ambiguity
+		// (there is an ambiguity because there is also a MSFT contract with primary exchange = "AEB")
+		contract.primaryExch("ISLAND");
+		//! [stkcontractwithprimary]
+		return contract;
+	}
+
+	public static Contract USStockWithPrimaryExchTwo() {
+		//! [stkcontractwithprimary]
+		Contract contract = new Contract();
+		contract.symbol("AMZN");
 		contract.secType("STK");
 		contract.currency("USD");
 		contract.exchange("SMART");
