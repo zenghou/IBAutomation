@@ -5,6 +5,8 @@ import com.ib.client.EReaderSignal;
 
 import logic.Logic;
 import logic.LogicManager;
+import model.Model;
+import model.ModelManager;
 import samples.testbed.ewrapper.EWrapperImpl;
 
 public class MainApp {
@@ -14,13 +16,15 @@ public class MainApp {
     protected EReader eReader;
 
     protected Logic logic;
+    protected Model model;
 
     public void init() throws Exception {
         eWrapper = new EWrapperImpl();
         eClientSocket = eWrapper.getClient();
         eReaderSignal = eWrapper.getSignal();
 
-        logic = new LogicManager();
+        model = new ModelManager();
+        logic = new LogicManager(model);
 
         // Connect to server
         eClientSocket.eConnect("127.0.0.1", 7496, 0);
