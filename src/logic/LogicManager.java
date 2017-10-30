@@ -3,14 +3,31 @@ package logic;
 import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 
-public class LogicManager implements Logic {
-    @Override
-    public void realTimeBars(EClientSocket eClientSocket, Contract stockContract) throws InterruptedException {
-        System.out.println("Collecting real time bars");
+import model.Model;
 
-        //TODO: change the tickerID
-        eClientSocket.reqRealTimeBars(3001, stockContract, 5, "MIDPOINT",
-                true, null);
+public class LogicManager implements Logic {
+    private Model model;
+    private Parser parser;
+
+    public LogicManager(Model modelManager) {
+        model = modelManager;
+        parser = new Parser("/Users/ZengHou/Desktop/testStockList.csv", model);
+        parser.readDataUpdateModel();
+        model.initializeModel(); // called after listOfSymbol is populated
+    }
+
+    /**
+     * Loops through model's contract list and retrieves realtimebars for each stock inside
+     * @param eClientSocket to transmit request message from client to TWS server
+     * @throws InterruptedException
+     */
+    @Override
+    public void getRealTimeBars(EClientSocket eClientSocket) throws InterruptedException {
+
+        for (Contract contract: model.getViewOnlyContractList()) {
+            eClientSocket.reqRealTimeBars(3001, contract, 5, "MIDPOINT",
+                    true, null);
+        }
     }
 
     @Override
@@ -19,7 +36,7 @@ public class LogicManager implements Logic {
     }
 
     @Override
-    public boolean hasFallenByPercentage(int percentage) {
+    public boolean hasFallenByPercentage(Contract contract, int percentage) {
         return false;
     }
 

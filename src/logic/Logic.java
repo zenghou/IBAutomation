@@ -7,7 +7,7 @@ public interface Logic {
     /**
      * Get real-time stock prices
      */
-    void realTimeBars(EClientSocket eClientSocket, Contract stockContract) throws InterruptedException;
+    void getRealTimeBars(EClientSocket eClientSocket) throws InterruptedException;
 
     /**
      * Takes in a {@code stock} whose current price is 16% below opening price
@@ -18,7 +18,7 @@ public interface Logic {
     /**
      * Determines if stock's current price is below opening price by {@code percentage}
      */
-    boolean hasFallenByPercentage(int percentage);
+    boolean hasFallenByPercentage(Contract contract, int percentage);
 
     /**
      * Gets the opening price of a stock symbol
