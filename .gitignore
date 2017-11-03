@@ -28,3 +28,7 @@ out/production/IBSample/samples/testbed/ewrapper/EWrapperImpl\.class
 out/test/IBSample/logic/ParserTest\.class
 
 *.xml
+
+out/production/IBSample/Logic/ContractBuilder\.class
+
+out/production/IBSample/model/ContractWithPriceDetail\.class
