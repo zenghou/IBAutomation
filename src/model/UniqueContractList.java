@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import com.ib.client.Contract;
 
+import model.exceptions.DuplicateContractException;
+
 /**
  * Stores a list of unique Contracts which are to be monitored with live stream of price data
  */
@@ -14,7 +16,10 @@ public class UniqueContractList {
         contractArrayList = new ArrayList<>();
     }
 
-    public void addContract(Contract contract){
+    public void addContract(Contract contract) throws DuplicateContractException{
+        if (contractArrayList.contains(contract)) {
+            throw new DuplicateContractException();
+        }
         contractArrayList.add(contract);
     }
 
