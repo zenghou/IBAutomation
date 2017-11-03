@@ -5,14 +5,17 @@ import java.util.ArrayList;
 import com.ib.client.Contract;
 
 import logic.ContractBuilder;
+import model.exceptions.DuplicateContractException;
 
 public class ModelManager implements Model {
     private UniqueContractList uniqueContractList;
     private ArrayList<String> listOfSymbols;
+    private ArrayList<StockPriceProperty> listOfStockPriceProperties;
 
     public ModelManager() {
         uniqueContractList = new UniqueContractList();
         listOfSymbols = new ArrayList<>();
+        listOfStockPriceProperties = new ArrayList<>();
     }
 
     /**
@@ -46,8 +49,12 @@ public class ModelManager implements Model {
      * Called only by {@link #initializeModel()}
      */
     private void createUniqueContractList() {
-        for (String symbol: listOfSymbols) {
-            uniqueContractList.addContract(ContractBuilder.buildStock(symbol));
+        try {
+            for (String symbol : listOfSymbols) {
+                uniqueContractList.addContract(ContractBuilder.buildStock(symbol));
+            }
+        } catch (DuplicateContractException dce) {
+            System.out.println(dce.getMessage() + "\n" + "There should not be any duplicate symbols");
         }
     }
 }
