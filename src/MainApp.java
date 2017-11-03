@@ -19,12 +19,12 @@ public class MainApp {
     protected Model model;
 
     public void init() throws Exception {
-        eWrapper = new EWrapperImpl();
-        eClientSocket = eWrapper.getClient();
-        eReaderSignal = eWrapper.getSignal();
-
         model = new ModelManager();
         logic = new LogicManager(model);
+
+        eWrapper = new EWrapperImpl(model);
+        eClientSocket = eWrapper.getClient();
+        eReaderSignal = eWrapper.getSignal();
 
         // Connect to server
         eClientSocket.eConnect("127.0.0.1", 7496, 0);
@@ -52,7 +52,8 @@ public class MainApp {
     public static void main(String[] args) throws Exception {
         MainApp mainApp = new MainApp();
         mainApp.init();
-        mainApp.stop();
+        mainApp.logic.getRealTimeBars(mainApp.eClientSocket);
+        // mainApp.stop();
     }
 
     /**
