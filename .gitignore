@@ -26,3 +26,5 @@ out/production/IBSample/samples/testbed/contracts/ContractSamples\.class
 out/production/IBSample/samples/testbed/ewrapper/EWrapperImpl\.class
 
 out/test/IBSample/logic/ParserTest\.class
+
+*.xml
