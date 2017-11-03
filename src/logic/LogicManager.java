@@ -4,7 +4,6 @@ import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 
 import model.Model;
-import samples.testbed.contracts.ContractSamples;
 
 public class LogicManager implements Logic {
     private Model model;
