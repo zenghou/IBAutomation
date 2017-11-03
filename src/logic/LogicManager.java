@@ -4,10 +4,12 @@ import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 
 import model.Model;
+import samples.testbed.contracts.ContractSamples;
 
 public class LogicManager implements Logic {
     private Model model;
     private Parser parser;
+    private int id = 1;
 
     public LogicManager(Model modelManager) {
         model = modelManager;
@@ -23,10 +25,12 @@ public class LogicManager implements Logic {
      */
     @Override
     public void getRealTimeBars(EClientSocket eClientSocket) throws InterruptedException {
-
         for (Contract contract: model.getViewOnlyContractList()) {
-            eClientSocket.reqRealTimeBars(3001, contract, 5, "MIDPOINT",
+            System.out.println("Getting price for: " + contract.symbol());
+            System.out.println("current id is: " + id);
+            eClientSocket.reqRealTimeBars(id, contract, 5, "MIDPOINT",
                     true, null);
+            id++;
         }
     }
 
