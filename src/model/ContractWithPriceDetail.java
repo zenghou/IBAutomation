@@ -56,12 +56,20 @@ public class ContractWithPriceDetail extends Contract{
         return false;
     }
 
+    public int getRequestId() {
+        return requestId;
+    }
+
+    public boolean hasOpeningPrice() {
+        return hasOpeningPrice;
+    }
+
     /**
      * Assigns this Contract with a request Id after realTimeBars is called. Only able to set the requestId once.
      * Guaranteed to be immutable.
      */
     public void setRequestId(int requestId) throws Exception {
-        if (requestId != -1) {
+        if (this.requestId != -1) {
             throw new Exception("Cannot change requestId!");
         }
         this.requestId = requestId;
