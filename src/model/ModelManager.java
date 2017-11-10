@@ -8,9 +8,10 @@ import logic.ContractBuilder;
 import model.exceptions.DuplicateContractException;
 
 public class ModelManager implements Model {
-    private UniqueContractList uniqueContractList;
+    /** List of symbols prepared after {@code Parser} reads the csv file */
     private ArrayList<String> listOfSymbols;
     private ArrayList<StockPriceProperty> listOfStockPriceProperties;
+    private UniqueContractList uniqueContractList;
 
     public ModelManager() {
         uniqueContractList = new UniqueContractList();
