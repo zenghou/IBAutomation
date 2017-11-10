@@ -10,13 +10,12 @@ import model.exceptions.DuplicateContractException;
 public class ModelManager implements Model {
     /** List of symbols prepared after {@code Parser} reads the csv file */
     private ArrayList<String> listOfSymbols;
-    private ArrayList<StockPriceProperty> listOfStockPriceProperties;
     private UniqueContractWithPriceDetailList uniqueContractWithPriceDetailList;
 
     public ModelManager() {
         uniqueContractWithPriceDetailList = new UniqueContractWithPriceDetailList();
         listOfSymbols = new ArrayList<>();
-        listOfStockPriceProperties = new ArrayList<>();
+        // listOfStockPriceProperties = new ArrayList<>();
     }
 
     /**
@@ -42,6 +41,20 @@ public class ModelManager implements Model {
     @Override
     public ArrayList<ContractWithPriceDetail> getViewOnlyContractWithPriceDetailList() {
         return uniqueContractWithPriceDetailList.getContractArrayWithPriceDetailList();
+    }
+
+    @Override
+    public ContractWithPriceDetail retrieveContractWithPriceDetailByReqId(int reqId) {
+        ContractWithPriceDetail contractWithPriceDetail = null;
+        for (ContractWithPriceDetail contract: uniqueContractWithPriceDetailList
+                .getContractArrayWithPriceDetailList()) {
+            if (contract.getRequestId() == reqId) {
+                contractWithPriceDetail = contract;
+                break;
+            }
+        }
+        assert(contractWithPriceDetail != null);
+        return contractWithPriceDetail;
     }
 
     /**

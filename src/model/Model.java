@@ -19,4 +19,7 @@ public interface Model {
 
     /** Returns an String arraylist for the {@see Parser} to populate with symbols */
     ArrayList<String> getListOfSymbolsArray();
+
+    /** Retrieves a ContractWithPriceDetails by requestId and returns it to caller*/
+    ContractWithPriceDetail retrieveContractWithPriceDetailByReqId(int reqId);
 }
