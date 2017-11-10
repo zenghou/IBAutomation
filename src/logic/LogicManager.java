@@ -3,18 +3,21 @@ package logic;
 import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 
+import model.ContractWithPriceDetail;
 import model.Model;
 
 public class LogicManager implements Logic {
     private Model model;
     private Parser parser;
-    private int id = 1;
+    private int requestId = 1;
 
     public LogicManager(Model modelManager) {
         model = modelManager;
         parser = new Parser("/Users/ZengHou/Desktop/testStockList.csv", model);
         parser.readDataUpdateModel();
-        model.initializeModel(); // called after listOfSymbol is populated
+
+        // called after listOfSymbol is populated by parser#readDataUpdateModel()
+        model.initializeModel();
     }
 
     /**
@@ -24,12 +27,36 @@ public class LogicManager implements Logic {
      */
     @Override
     public void getRealTimeBars(EClientSocket eClientSocket) throws InterruptedException {
-        for (Contract contract: model.getViewOnlyContractList()) {
+        for (ContractWithPriceDetail contract: model.getViewOnlyContractWithPriceDetailList()) {
+            // Print log
             System.out.println("Getting price for: " + contract.symbol());
-            System.out.println("current id is: " + id);
-            eClientSocket.reqRealTimeBars(id, contract, 5, "MIDPOINT",
+            System.out.println("current id is: " + requestId);
+
+            setRequestIdForContractWithPriceDetail(requestId, contract);
+
+            eClientSocket.reqRealTimeBars(requestId, contract, 5, "MIDPOINT",
                     true, null);
-            id++;
+            requestId++;
+        }
+    }
+
+    public void cancelRealTimeBars(EClientSocket eClientSocket) {
+        for (int i = 1; i < requestId; i++) {
+            eClientSocket.cancelRealTimeBars(i);
+        }
+    }
+
+    /**
+     * Private method to be called by {@code getRealTimeBars}
+     * Although setting of requestId for a ContractWithPriceDetail is fairly simple, it is extracted in to abide by
+     * single responsibility principle. Moreover, this method handles the exception, which prevents long try catch
+     * block in getRealTimeBars.
+     */
+    private void setRequestIdForContractWithPriceDetail(int reqId, ContractWithPriceDetail contract) {
+        try {
+            contract.setRequestId(reqId);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

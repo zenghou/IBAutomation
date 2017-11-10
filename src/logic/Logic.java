@@ -24,4 +24,9 @@ public interface Logic {
      * Gets the opening price of a stock symbol
      */
     double getOpeningPrice(String stockSymbol);
+
+    /**
+     * Cancels the current realtimebar subscription
+     */
+    void cancelRealTimeBars(EClientSocket eClientSocket);
 }
