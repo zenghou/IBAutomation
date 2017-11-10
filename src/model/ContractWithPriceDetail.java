@@ -64,6 +64,10 @@ public class ContractWithPriceDetail extends Contract{
         return hasOpeningPrice;
     }
 
+    public double getDayOpeningPrice() {
+        return dayOpeningPrice;
+    }
+
     /**
      * Assigns this Contract with a request Id after realTimeBars is called. Only able to set the requestId once.
      * Guaranteed to be immutable.
