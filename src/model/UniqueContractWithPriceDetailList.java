@@ -2,8 +2,6 @@ package model;
 
 import java.util.ArrayList;
 
-import com.ib.client.Contract;
-
 import model.exceptions.DuplicateContractException;
 
 /**
