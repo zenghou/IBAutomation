@@ -1,7 +1,6 @@
 package samples.testbed.ewrapper;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -9,22 +8,31 @@ import java.util.Set;
 
 import com.ib.client.*;
 
+import logic.Logic;
+import model.ContractWithPriceDetail;
+import model.Model;
+
 //! [ewrapperimpl]
 public class EWrapperImpl implements EWrapper {
-	//! [ewrapperimpl]
-	
-	//! [socket_declare]
 	private EReaderSignal readerSignal;
 	private EClientSocket clientSocket;
+	private Model model;
 	protected int currentOrderId = -1;
-	//! [socket_declare]
-	
-	//! [socket_init]
+
 	public EWrapperImpl() {
 		readerSignal = new EJavaSignal();
 		clientSocket = new EClientSocket(this, readerSignal);
 	}
-	//! [socket_init]
+
+	public EWrapperImpl(Model model) {
+	    this(); // calls default constructor
+	    setModel(model);
+    }
+
+	public void setModel(Model model) {
+	    this.model = model;
+    }
+
 	public EClientSocket getClient() {
 		return clientSocket;
 	}
@@ -36,16 +44,13 @@ public class EWrapperImpl implements EWrapper {
 	public int getCurrentOrderId() {
 		return currentOrderId;
 	}
-
-    public ArrayList<StockProperty> listOfShortListedStocks = new ArrayList<>();
 	
-	 //! [tickprice]
+
 	@Override
 	public void tickPrice(int tickerId, int field, double price, TickAttr attribs) {
 		System.out.println("Tick Price. Ticker Id:"+tickerId+", Field: "+field+", Price: "+price+", CanAutoExecute: "+ attribs.canAutoExecute()
 		+ ", pastLimit: " + attribs.pastLimit() + ", pre-open: " + attribs.preOpen());
 	}
-	//! [tickprice]
 	
 	//! [ticksize]
 	@Override
@@ -228,9 +233,6 @@ public class EWrapperImpl implements EWrapper {
 	//! [historicaldata]
 	@Override
 	public void historicalData(int reqId, Bar bar) {
-	    // save Data to StockProperty object
-        StockProperty savedData = new StockProperty(bar.open(), bar.high(), bar.low(), bar.close());
-        listOfShortListedStocks.add(savedData);
 		System.out.println("HistoricalData. "+reqId+" - Date: "+bar.time()+", Open: "+bar.open()+", High: "+bar.high()+", Low: "+bar.low()+", Close: "+bar.close()+", Volume: "+bar.volume()+", Count: "+bar.count()+", WAP: "+bar.wap());
 	}
 	//! [historicaldata]
@@ -266,14 +268,47 @@ public class EWrapperImpl implements EWrapper {
 		System.out.println("ScannerDataEnd. "+reqId);
 	}
 	//! [scannerdataend]
-	
-	//! [realtimebar]
+
+
+	/**
+	 * Handles the call back from reqRealTimeBar
+	 */
 	@Override
 	public void realtimeBar(int reqId, long time, double open, double high,
 			double low, double close, long volume, double wap, int count) {
-		System.out.println("RealTimeBars. " + reqId + " - Time: " + time + ", Open: " + open + ", High: " + high + ", Low: " + low + ", Close: " + close + ", Volume: " + volume + ", Count: " + count + ", WAP: " + wap);
+		System.out.println("[EWrapperImpl] RealTimeBars. " + reqId + " - Time: " + time + ", Open: " + open
+                + ", High: " + high + ", Low: " + low + ", Close: " + close);
+
+		setOpeningPrice(reqId, open);
+		System.out.println("has fallen by 16%: " + isReadyForOrderSubmission(reqId, open));
 	}
-	//! [realtimebar]
+
+	/**
+     * Sets opening price of stock in {@see ContractWithPriceDetail} by reqId only if opening price is not set.
+     * Handles the exception thrown when trying to set the opening price for a ContractWithPriceDetails when there
+     * already is an opening price stored.
+     */
+	private void setOpeningPrice(int reqId, double openingPrice) {
+        ContractWithPriceDetail contract = model.retrieveContractWithPriceDetailByReqId(reqId);
+        if (!contract.hasOpeningPrice()) {
+            try {
+                contract.setDayOpeningPrice(openingPrice);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Takes in the {@param currentPrice} and checks if a ContractWithPriceDetail retrieved by {@param reqId}
+     * is ready to be submitted for ordering at the current price (i.e. meets the 16% decrease criteria)
+     * @return true if ContractWithPriceDetail can be submitted for purchase
+     */
+    private boolean isReadyForOrderSubmission(int reqId, double currentPrice) {
+        ContractWithPriceDetail contract = model.retrieveContractWithPriceDetailByReqId(reqId);
+        return contract.hasFallenBelowPercentage(currentPrice);
+    }
+
 	@Override
 	public void currentTime(long time) {
 		System.out.println("currentTime");
