@@ -11,16 +11,16 @@ public class ModelManager implements Model {
     /** List of symbols prepared after {@code Parser} reads the csv file */
     private ArrayList<String> listOfSymbols;
     private ArrayList<StockPriceProperty> listOfStockPriceProperties;
-    private UniqueContractList uniqueContractList;
+    private UniqueContractWithPriceDetailList uniqueContractWithPriceDetailList;
 
     public ModelManager() {
-        uniqueContractList = new UniqueContractList();
+        uniqueContractWithPriceDetailList = new UniqueContractWithPriceDetailList();
         listOfSymbols = new ArrayList<>();
         listOfStockPriceProperties = new ArrayList<>();
     }
 
     /**
-     * Prepares the Model class by populating uniqueContractList and listOfSymbols.
+     * Prepares the Model class by populating uniqueContractWithPriceDetailList and listOfSymbols.
      * Can only be called when {@code listOfSymbols} is prepared.
      */
     @Override
@@ -35,24 +35,24 @@ public class ModelManager implements Model {
     }
 
     @Override
-    public UniqueContractList getUniqueContractList() {
-        return uniqueContractList;
+    public UniqueContractWithPriceDetailList getUniqueContractWithPriceDetailList() {
+        return uniqueContractWithPriceDetailList;
     }
 
     @Override
-    public ArrayList<Contract> getViewOnlyContractList() {
-        return uniqueContractList.getContractArrayList();
+    public ArrayList<ContractWithPriceDetail> getViewOnlyContractWithPriceDetailList() {
+        return uniqueContractWithPriceDetailList.getContractArrayWithPriceDetailList();
     }
 
     /**
      * Loops through all ticker symbols in {@code listOfSymbols}
-     * and adds the created Contract object into {@code uniqueContractList}.
+     * and adds the created Contract object into {@code uniqueContractWithPriceDetailList}.
      * Called only by {@link #initializeModel()}
      */
     private void createUniqueContractList() {
         try {
             for (String symbol : listOfSymbols) {
-                uniqueContractList.addContract(ContractBuilder.buildStock(symbol));
+                uniqueContractWithPriceDetailList.addContract(ContractBuilder.buildContractWithPriceDetail(symbol));
             }
         } catch (DuplicateContractException dce) {
             System.out.println(dce.getMessage() + "\n" + "There should not be any duplicate symbols");
