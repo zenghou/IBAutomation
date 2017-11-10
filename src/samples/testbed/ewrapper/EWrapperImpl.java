@@ -297,6 +297,9 @@ public class EWrapperImpl implements EWrapper {
                 e.printStackTrace();
             }
         }
+
+        // temporary print log
+        System.out.println(contract.symbol() + " opening price should always be this value: " + contract.getDayOpeningPrice());
     }
 
     /**
@@ -306,6 +309,7 @@ public class EWrapperImpl implements EWrapper {
      */
     private boolean isReadyForOrderSubmission(int reqId, double currentPrice) {
         ContractWithPriceDetail contract = model.retrieveContractWithPriceDetailByReqId(reqId);
+        System.out.println(contract.symbol() + "'s current trade price is " + currentPrice);
         return contract.hasFallenBelowPercentage(currentPrice);
     }
 
