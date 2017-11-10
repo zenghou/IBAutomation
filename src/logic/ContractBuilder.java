@@ -2,14 +2,16 @@ package logic;
 
 import com.ib.client.Contract;
 
+import model.ContractWithPriceDetail;
+
 public class ContractBuilder {
     /**
-     * Creates a Contract object with a stock symbol
+     * Creates a {@see ContractWithPriceDetail} object with a stock symbol
      * @param stockSymbol
-     * @return a Contract object
+     * @return a ContractWithPriceDetail object
      */
-    public static Contract buildStock(String stockSymbol) {
-        Contract contract = new Contract();
+    public static ContractWithPriceDetail buildContractWithPriceDetail(String stockSymbol) {
+        ContractWithPriceDetail contract = new ContractWithPriceDetail();
         contract.symbol(stockSymbol);
         contract.secType("STK");
         contract.currency("USD");
