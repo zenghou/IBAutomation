@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import logic.ContractBuilder;
 import model.exceptions.DuplicateContractException;
+import model.exceptions.FullContractListException;
 
 public class ModelManager implements Model {
     /** List of symbols prepared after {@code Parser} reads the csv file */
@@ -70,6 +71,29 @@ public class ModelManager implements Model {
             }
         } catch (DuplicateContractException dce) {
             System.out.println(dce.getMessage() + "\n" + "There should not be any duplicate symbols");
+        } catch (FullContractListException fcle) {
+            System.out.println(fcle.getMessage() + "\n" + "Additional contracts should not be added to a full" +
+                    "Contract list");
         }
+    }
+
+    /**
+     * Adds a {@link ContractWithPriceDetail} to {@link UniqueOrderContractList} in ModelManager after it is checked
+     * to be ready for order submission {@link ContractWithPriceDetail#hasFallenBelowPercentage(double)}.
+     */
+    public void addContractWithPriceDetailToOrderList(ContractWithPriceDetail contractWithPriceDetail) {
+        try {
+            uniqueOrderContractList.addContract(contractWithPriceDetail);
+        } catch (DuplicateContractException dce) {
+            System.out.println(dce.getMessage() + "\n" + "There should not be any duplicate symbols");
+        } catch (FullContractListException fcle) {
+            System.out.println(fcle.getMessage()+ "\n" + "Additional contracts should not be added to a full" +
+                    "Contract list");
+        }
+    }
+
+    @Override
+    public UniqueOrderContractList getUniqueOrderContractList() {
+        return uniqueOrderContractList;
     }
 }

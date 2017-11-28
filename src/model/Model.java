@@ -20,4 +20,10 @@ public interface Model {
 
     /** Retrieves a ContractWithPriceDetails by requestId and returns it to caller*/
     ContractWithPriceDetail retrieveContractWithPriceDetailByReqId(int reqId);
+
+    /** Returns a UniqueOrderContractList object */
+    UniqueOrderContractList getUniqueOrderContractList();
+
+    /** Adds a contract that is ready for purchase order to the UniqueOrderContractList */
+    void addContractWithPriceDetailToOrderList(ContractWithPriceDetail contractWithPriceDetail);
 }
