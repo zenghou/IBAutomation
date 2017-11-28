@@ -63,7 +63,7 @@ public class EWrapperImplementation implements EWrapper {
         System.out.println("has fallen by 16%: " + isReadyForOrderSubmission(contract, open));
 
         if (isReadyForOrderSubmission(contract, open)) {
-
+            model.addContractWithPriceDetailToOrderList(contract);
         }
     }
 
