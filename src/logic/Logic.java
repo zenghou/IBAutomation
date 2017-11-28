@@ -3,6 +3,8 @@ package logic;
 import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 
+import model.ContractWithPriceDetail;
+
 public interface Logic {
     /**
      * Get real-time stock prices
@@ -13,7 +15,7 @@ public interface Logic {
      * Takes in a {@code stock} whose current price is 16% below opening price
      * and executes a Limit Buy order.
      */
-    void placeLimitBuyOrder(EClientSocket eClientSocket, Contract stock);
+    void placeLimitBuyOrder(EClientSocket eClientSocket, ContractWithPriceDetail contract);
 
     /**
      * Determines if stock's current price is below opening price by {@code percentage}

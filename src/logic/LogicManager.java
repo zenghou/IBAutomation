@@ -18,6 +18,7 @@ public class LogicManager implements Logic {
 
         // called after listOfSymbol is populated by parser#readDataUpdateModel()
         model.initializeModel();
+        model.getUniqueOrderContractList().setLogic(this);
     }
 
     /**
@@ -32,6 +33,7 @@ public class LogicManager implements Logic {
             System.out.println("Getting price for: " + contract.symbol());
             System.out.println("current id is: " + requestId);
 
+            // set unique req Id for each contract
             setRequestIdForContractWithPriceDetail(requestId, contract);
 
             eClientSocket.reqRealTimeBars(requestId, contract, 5, "MIDPOINT",
@@ -61,7 +63,7 @@ public class LogicManager implements Logic {
     }
 
     @Override
-    public void placeLimitBuyOrder(EClientSocket eClientSocket, Contract stock) {
+    public void placeLimitBuyOrder(EClientSocket eClientSocket, ContractWithPriceDetail contractWithPriceDetail) {
 
     }
 
