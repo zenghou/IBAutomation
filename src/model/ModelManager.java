@@ -2,24 +2,22 @@ package model;
 
 import java.util.ArrayList;
 
-import com.ib.client.Contract;
-
 import logic.ContractBuilder;
 import model.exceptions.DuplicateContractException;
 
 public class ModelManager implements Model {
     /** List of symbols prepared after {@code Parser} reads the csv file */
     private ArrayList<String> listOfSymbols;
-    private UniqueContractWithPriceDetailList uniqueContractWithPriceDetailList;
+    private UniqueContractList uniqueContractList;
 
     public ModelManager() {
-        uniqueContractWithPriceDetailList = new UniqueContractWithPriceDetailList();
+        uniqueContractList = new UniqueContractList();
         listOfSymbols = new ArrayList<>();
         // listOfStockPriceProperties = new ArrayList<>();
     }
 
     /**
-     * Prepares the Model class by populating uniqueContractWithPriceDetailList and listOfSymbols.
+     * Prepares the Model class by populating uniqueContractList and listOfSymbols.
      * Can only be called when {@code listOfSymbols} is prepared.
      */
     @Override
@@ -34,19 +32,19 @@ public class ModelManager implements Model {
     }
 
     @Override
-    public UniqueContractWithPriceDetailList getUniqueContractWithPriceDetailList() {
-        return uniqueContractWithPriceDetailList;
+    public UniqueContractList getUniqueContractList() {
+        return uniqueContractList;
     }
 
     @Override
     public ArrayList<ContractWithPriceDetail> getViewOnlyContractWithPriceDetailList() {
-        return uniqueContractWithPriceDetailList.getContractArrayWithPriceDetailList();
+        return uniqueContractList.getContractArrayWithPriceDetailList();
     }
 
     @Override
     public ContractWithPriceDetail retrieveContractWithPriceDetailByReqId(int reqId) {
         ContractWithPriceDetail contractWithPriceDetail = null;
-        for (ContractWithPriceDetail contract: uniqueContractWithPriceDetailList
+        for (ContractWithPriceDetail contract: uniqueContractList
                 .getContractArrayWithPriceDetailList()) {
             if (contract.getRequestId() == reqId) {
                 contractWithPriceDetail = contract;
@@ -59,13 +57,13 @@ public class ModelManager implements Model {
 
     /**
      * Loops through all ticker symbols in {@code listOfSymbols}
-     * and adds the created Contract object into {@code uniqueContractWithPriceDetailList}.
+     * and adds the created Contract object into {@code uniqueContractList}.
      * Called only by {@link #initializeModel()}
      */
     private void createUniqueContractList() {
         try {
             for (String symbol : listOfSymbols) {
-                uniqueContractWithPriceDetailList.addContract(ContractBuilder.buildContractWithPriceDetail(symbol));
+                uniqueContractList.addContract(ContractBuilder.buildContractWithPriceDetail(symbol));
             }
         } catch (DuplicateContractException dce) {
             System.out.println(dce.getMessage() + "\n" + "There should not be any duplicate symbols");

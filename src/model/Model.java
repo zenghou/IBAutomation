@@ -2,19 +2,17 @@ package model;
 
 import java.util.ArrayList;
 
-import com.ib.client.Contract;
-
 /**
  * The API of the model component
  */
 public interface Model {
-    /** Returns a UniqueContractWithPriceDetailList object */
-    UniqueContractWithPriceDetailList getUniqueContractWithPriceDetailList();
+    /** Returns a UniqueContractList object */
+    UniqueContractList getUniqueContractList();
 
-    /** Returns a list of iterable Contracts from a UniqueContractWithPriceDetailList object */
+    /** Returns a list of iterable Contracts from a UniqueContractList object */
     ArrayList<ContractWithPriceDetail> getViewOnlyContractWithPriceDetailList();
 
-    /** Sets up a model with a {@see listOfSymbols} and {@see UniqueContractWithPriceDetailList} */
+    /** Sets up a model with a {@see listOfSymbols} and {@see UniqueContractList} */
     void initializeModel();
 
     /** Returns an String arraylist for the {@see Parser} to populate with symbols */

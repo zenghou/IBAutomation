@@ -7,10 +7,10 @@ import model.exceptions.DuplicateContractException;
 /**
  * Stores a list of unique ContractWithPriceDetail which are to be monitored with live stream of price data
  */
-public class UniqueContractWithPriceDetailList {
+public class UniqueContractList {
     private final ArrayList <ContractWithPriceDetail> contractWithPriceDetailArrayListArrayList;
 
-    public UniqueContractWithPriceDetailList() {
+    public UniqueContractList() {
         contractWithPriceDetailArrayListArrayList = new ArrayList<>();
     }
 
