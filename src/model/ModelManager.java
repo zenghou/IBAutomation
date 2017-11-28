@@ -9,11 +9,14 @@ public class ModelManager implements Model {
     /** List of symbols prepared after {@code Parser} reads the csv file */
     private ArrayList<String> listOfSymbols;
     private UniqueContractList uniqueContractList;
+    private UniqueOrderContractList uniqueOrderContractList;
 
     public ModelManager() {
         uniqueContractList = new UniqueContractList();
         listOfSymbols = new ArrayList<>();
-        // listOfStockPriceProperties = new ArrayList<>();
+
+        // uniqueOrderContractList holds at most 15 contracts
+        uniqueOrderContractList = new UniqueOrderContractList(15);
     }
 
     /**
