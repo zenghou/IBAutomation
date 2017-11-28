@@ -32,3 +32,5 @@ out/test/IBSample/logic/ParserTest\.class
 out/production/IBSample/Logic/ContractBuilder\.class
 
 out/production/IBSample/model/ContractWithPriceDetail\.class
+
+out/production/IBSample/com/ib/client/EClient\.class
