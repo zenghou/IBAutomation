@@ -3,14 +3,14 @@ import com.ib.client.EReader;
 import com.ib.client.EReaderSignal;
 
 
+import logic.EWrapperImplementation;
 import logic.Logic;
 import logic.LogicManager;
 import model.Model;
 import model.ModelManager;
-import samples.testbed.ewrapper.EWrapperImpl;
 
 public class MainApp {
-    protected EWrapperImpl eWrapper; // Mechanism through which TWS delivers information to client app
+    protected EWrapperImplementation eWrapper; // Mechanism through which TWS delivers information to client app
     protected EClientSocket eClientSocket; // Mechanism through which client app delivers information to TWS
     protected EReaderSignal eReaderSignal;
     protected EReader eReader;
@@ -20,11 +20,12 @@ public class MainApp {
 
     public void init() throws Exception {
         model = new ModelManager();
-        logic = new LogicManager(model);
 
-        eWrapper = new EWrapperImpl(model);
+        eWrapper = new EWrapperImplementation(model);
         eClientSocket = eWrapper.getClient();
         eReaderSignal = eWrapper.getSignal();
+
+        logic = new LogicManager(model, eClientSocket);
 
         // Connect to server
         eClientSocket.eConnect("127.0.0.1", 7496, 0);
@@ -52,7 +53,8 @@ public class MainApp {
     public static void main(String[] args) throws Exception {
         MainApp mainApp = new MainApp();
         mainApp.init();
-        mainApp.logic.getRealTimeBars(mainApp.eClientSocket);
+        mainApp.logic.getRealTimeBars();
+        // mainApp.logic.cancelRealTimeBars(mainApp.eClientSocket);
         // mainApp.stop();
     }
 
