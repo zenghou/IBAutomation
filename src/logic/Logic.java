@@ -9,13 +9,13 @@ public interface Logic {
     /**
      * Get real-time stock prices
      */
-    void getRealTimeBars(EClientSocket eClientSocket) throws InterruptedException;
+    void getRealTimeBars() throws InterruptedException;
 
     /**
      * Takes in a {@code stock} whose current price is 16% below opening price
      * and executes a Limit Buy order.
      */
-    void placeLimitBuyOrder(EClientSocket eClientSocket, ContractWithPriceDetail contract);
+    void placeLimitBuyOrder(ContractWithPriceDetail contract);
 
     /**
      * Determines if stock's current price is below opening price by {@code percentage}
@@ -30,5 +30,5 @@ public interface Logic {
     /**
      * Cancels the current realtimebar subscription
      */
-    void cancelRealTimeBars(EClientSocket eClientSocket);
+    void cancelRealTimeBars();
 }

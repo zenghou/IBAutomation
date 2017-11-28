@@ -9,10 +9,12 @@ import model.Model;
 public class LogicManager implements Logic {
     private Model model;
     private Parser parser;
+    private EClientSocket eClientSocket;
     private int requestId = 1;
 
-    public LogicManager(Model modelManager) {
-        model = modelManager;
+    public LogicManager(Model modelManager, EClientSocket eClientSocket) {
+        this.model = modelManager;
+        this.eClientSocket = eClientSocket;
         parser = new Parser("/Users/ZengHou/Desktop/testStockList.csv", model);
         parser.readDataUpdateModel();
 
@@ -23,11 +25,11 @@ public class LogicManager implements Logic {
 
     /**
      * Loops through model's contract list and retrieves realtimebars for each stock inside
-     * @param eClientSocket to transmit request message from client to TWS server
+     * eClientSocket to transmit request message from client to TWS server
      * @throws InterruptedException
      */
     @Override
-    public void getRealTimeBars(EClientSocket eClientSocket) throws InterruptedException {
+    public void getRealTimeBars() throws InterruptedException {
         for (ContractWithPriceDetail contract: model.getViewOnlyContractWithPriceDetailList()) {
             // Print log
             System.out.println("Getting price for: " + contract.symbol());
@@ -42,7 +44,8 @@ public class LogicManager implements Logic {
         }
     }
 
-    public void cancelRealTimeBars(EClientSocket eClientSocket) {
+    @Override
+    public void cancelRealTimeBars() {
         for (int i = 1; i < requestId; i++) {
             eClientSocket.cancelRealTimeBars(i);
         }
@@ -63,7 +66,7 @@ public class LogicManager implements Logic {
     }
 
     @Override
-    public void placeLimitBuyOrder(EClientSocket eClientSocket, ContractWithPriceDetail contractWithPriceDetail) {
+    public void placeLimitBuyOrder(ContractWithPriceDetail contractWithPriceDetail) {
 
     }
 
