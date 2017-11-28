@@ -2,6 +2,7 @@ package logic;
 
 import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
+import com.ib.client.Order;
 
 import model.ContractWithPriceDetail;
 import model.Model;
@@ -11,6 +12,7 @@ public class LogicManager implements Logic {
     private Parser parser;
     private EClientSocket eClientSocket;
     private int requestId = 1;
+    private int orderId = 1;
 
     public LogicManager(Model modelManager, EClientSocket eClientSocket) {
         this.model = modelManager;
@@ -67,7 +69,30 @@ public class LogicManager implements Logic {
 
     @Override
     public void placeLimitBuyOrder(ContractWithPriceDetail contractWithPriceDetail) {
+        double limitPrice = contractWithPriceDetail.getCurrentPrice();
 
+        assert(limitPrice > 0);
+
+        int quantityToBePurchased = calculateSharesBuyableWithSumAtPrice(300.00, limitPrice);
+
+        Order orderToBeSubmitted = createLimitBuyOrder(quantityToBePurchased, limitPrice);
+
+        eClientSocket.placeOrder(orderId, contractWithPriceDetail, orderToBeSubmitted);
+    }
+
+    /** Creates a buy order of {@code quantity} at {@code limitPrice} */
+    private Order createLimitBuyOrder(int quantity, double limitPrice) {
+        Order order = new Order();
+        order.action("BUY");
+        order.orderType("LMT");
+        order.totalQuantity(quantity);
+        order.lmtPrice(limitPrice);
+        return order;
+    }
+
+    /** Calculates the number of shares that can be purchased with {@code sum} at {@code purchasePrice}*/
+    private int calculateSharesBuyableWithSumAtPrice(double sum, double purchasePrice) {
+        return (int) Math.floor(sum/purchasePrice);
     }
 
     @Override
