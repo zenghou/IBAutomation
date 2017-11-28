@@ -14,6 +14,10 @@ public class UniqueContractList {
         contractWithPriceDetailArrayListArrayList = new ArrayList<>();
     }
 
+    public UniqueContractList(int maxNumberOfContracts) {
+        contractWithPriceDetailArrayListArrayList = new ArrayList<>(maxNumberOfContracts);
+    }
+
     public void addContract(ContractWithPriceDetail contract) throws DuplicateContractException{
         if (contractWithPriceDetailArrayListArrayList.contains(contract)) {
             throw new DuplicateContractException();
