@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 import com.ib.client.EReader;
 import com.ib.client.EReaderSignal;
@@ -50,7 +51,7 @@ public class TestBed {
 		Thread.sleep(1000);
 
 		// tickDataOperations(wrapper.getClient());
-		realTimeBars(wrapper.getClient());
+		// realTimeBars(m_client);
 		// orderOperations(wrapper.getClient(), wrapper.getCurrentOrderId());
 		//contractOperations(wrapper.getClient());
 		//hedgeSample(wrapper.getClient(), wrapper.getCurrentOrderId());
@@ -60,7 +61,7 @@ public class TestBed {
 		//reutersFundamentals(wrapper.getClient());
 		//marketDataType(wrapper.getClient());
 		// historicalDataRequests(wrapper.getClient());
-		//accountOperations(wrapper.getClient());
+		// accountOperations(wrapper.getClient());
 		//newsOperations(wrapper.getClient());
 		//marketDepthOperations(wrapper.getClient());
 		//rerouteCFDOperations(wrapper.getClient());
@@ -72,6 +73,7 @@ public class TestBed {
 		//histogram(wrapper.getClient());
 
         // System.out.println("This is a fking random calculation" + wrapper.listOfShortListedStocks.get(1).getRandomCalculation());
+		realTimeBars(m_client);
 
 		Thread.sleep(100000);
 		m_client.eDisconnect();
@@ -92,9 +94,9 @@ public class TestBed {
 	
 	private static void historicalTicks(EClientSocket client) {
 		//! [reqhistoricalticks]
-        client.reqHistoricalTicks(18001, ContractSamples.USStockAtSmart(), "20170712 21:39:33", null, 10, "TRADES", 1, true, null);
-        client.reqHistoricalTicks(18002, ContractSamples.USStockAtSmart(), "20170712 21:39:33", null, 10, "BID_ASK", 1, true, null);
-        client.reqHistoricalTicks(18003, ContractSamples.USStockAtSmart(), "20170712 21:39:33", null, 10, "MIDPOINT", 1, true, null);
+        client.reqHistoricalTicks(18001, ContractSamples.USStockWithPrimaryExchTwo(), "20170712 21:39:33", null, 10, "TRADES", 1, true, null);
+        // client.reqHistoricalTicks(18002, ContractSamples.USStockAtSmart(), "20170712 21:39:33", null, 10, "BID_ASK", 1, true, null);
+        // client.reqHistoricalTicks(18003, ContractSamples.USStockAtSmart(), "20170712 21:39:33", null, 10, "MIDPOINT", 1, true, null);
 		//! [reqhistoricalticks]
 	}
 
@@ -155,7 +157,7 @@ public class TestBed {
         client.placeOrder(nextOrderId++, ContractSamples.USStock(), faOrderOneAccount);
         //! [faorderoneaccount]
         
-        //! [faordergroupequalquantity]
+        //! [fa order group equal quantity]
         Order faOrderGroupEQ = OrderSamples.LimitOrder("SELL", 200, 2000);
         faOrderGroupEQ.faGroup("Group_Equal_Quantity");
         faOrderGroupEQ.faMethod("EqualQuantity");
@@ -180,7 +182,7 @@ public class TestBed {
 		//! [modelorder]
         Order modelOrder = OrderSamples.LimitOrder("BUY", 200, 100);
 		modelOrder.account("DF12345");  // master FA account number
-		modelOrder.modelCode("Technology"); // model for tech stocks first created in TWS
+		modelOrder.modelCode("Technology"); // uniqueContractList for tech stocks first created in TWS
 		client.placeOrder(nextOrderId++, ContractSamples.USStock(), modelOrder);
         //! [modelorder]
 		
@@ -227,7 +229,7 @@ public class TestBed {
 		/*** Requesting real time market data ***/
 		//Thread.sleep(1000);
 		//! [reqmktdata]
-		client.reqMktData(1001, ContractSamples.USStockWithPrimaryExch(), "", false, false, null);
+		client.reqMktData(1001, ContractSamples.USStockWithPrimaryExchTwo(), "", false, false, null);
 		//! [reqmktdata]
 
 /*		//! [reqsmartcomponents]
@@ -304,12 +306,12 @@ public class TestBed {
 		cal.add(Calendar.MONTH, -6);
 		SimpleDateFormat form = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
 		String formatted = form.format(cal.getTime());
-		client.reqHistoricalData(4001, ContractSamples.EurGbpFx(), formatted, "1 M", "1 day", "MIDPOINT", 1, 1, false, null);
+		client.reqHistoricalData(4001, ContractSamples.USStockWithPrimaryExchTwo(), formatted, "1 M", "1 day", "MIDPOINT", 1, 1, false, null);
 		client.reqHistoricalData(4002, ContractSamples.EuropeanStock(), formatted, "10 D", "1 min", "TRADES", 1, 1, false, null);
 		Thread.sleep(2000);
 		/*** Canceling historical data requests ***/
-		client.cancelHistoricalData(4001);
-        client.cancelHistoricalData(4002);
+		// client.cancelHistoricalData(4001);
+        // client.cancelHistoricalData(4002);
 		//! [reqhistoricaldata]
 		return;
 		//! [reqHistogramData]
@@ -323,11 +325,14 @@ public class TestBed {
 	}
 	
 	private static void realTimeBars(EClientSocket client) throws InterruptedException {
+	    System.out.println("collecting real time bars");
 		
 		/*** Requesting real time bars ***/
         //! [reqrealtimebars]
+		System.out.println(ContractSamples.USStockWithPrimaryExch());
+		System.out.println(ContractSamples.USStockWithPrimaryExchTwo());
         client.reqRealTimeBars(3001, ContractSamples.USStockWithPrimaryExch(), 5, "MIDPOINT", true, null);
-        client.reqRealTimeBars(300, ContractSamples.USStockWithPrimaryExchTwo(), 5, "MIDPOINT", true, null);
+        client.reqRealTimeBars(3002, ContractSamples.USStockWithPrimaryExchTwo(), 5, "MIDPOINT", true, null);
         //! [reqrealtimebars]
         Thread.sleep(2000);
         /*** Canceling real time bars ***/

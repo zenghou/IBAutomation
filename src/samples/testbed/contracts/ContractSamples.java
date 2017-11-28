@@ -25,7 +25,7 @@ public class ContractSamples {
 	public static Contract USStockWithPrimaryExchTwo() {
 		//! [stkcontractwithprimary]
 		Contract contract = new Contract();
-		contract.symbol("AMZN");
+		contract.symbol("AAPL");
 		contract.secType("STK");
 		contract.currency("USD");
 		contract.exchange("SMART");
