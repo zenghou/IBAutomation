@@ -10,6 +10,7 @@ public class ContractWithPriceDetail extends Contract{
     private boolean hasOpeningPrice;
     private double percentage;
     private int requestId;
+    private double currentPrice;
 
 
     public ContractWithPriceDetail() {
@@ -18,6 +19,7 @@ public class ContractWithPriceDetail extends Contract{
         dayOpeningPrice = 0.00; // no price is set
         hasOpeningPrice = false;
         requestId = -1; // default id which should be an invalid id
+        currentPrice = -1.00; // default value should be an invalid value
     }
 
     /**
@@ -43,9 +45,15 @@ public class ContractWithPriceDetail extends Contract{
      * percentage. Returns true if price has fallen, which indicates that stock is ready for purchase.
      */
     public boolean hasFallenBelowPercentage(double currentPrice) {
+        // current price has to be positive
+        assert(currentPrice > 0);
+
         if (currentPrice >= dayOpeningPrice) {
             return false;
         }
+
+        // set current price to the latest price
+        this.currentPrice = currentPrice;
 
         // Percentage decrease will be stored as a positive value. In other words, when a stock with day's opening
         // price of $1.00 falls to $0.70, the percentage decrease will be 30%.
@@ -66,6 +74,10 @@ public class ContractWithPriceDetail extends Contract{
 
     public double getDayOpeningPrice() {
         return dayOpeningPrice;
+    }
+
+    public double getCurrentPrice() {
+        return currentPrice;
     }
 
     /**
