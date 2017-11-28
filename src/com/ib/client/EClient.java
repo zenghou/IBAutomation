@@ -892,6 +892,7 @@ public abstract class EClient {
     
     
     public synchronized void reqRealTimeBars(int tickerId, Contract contract, int barSize, String whatToShow, boolean useRTH, List<TagValue> realTimeBarsOptions) {
+        System.out.println("[EClient] sending request for real time bars");
         // not connected?
         if( !isConnected()) {
             notConnected();
