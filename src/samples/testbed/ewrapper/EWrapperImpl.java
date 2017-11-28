@@ -8,11 +8,9 @@ import java.util.Set;
 
 import com.ib.client.*;
 
-import logic.Logic;
 import model.ContractWithPriceDetail;
 import model.Model;
 
-//! [ewrapperimpl]
 public class EWrapperImpl implements EWrapper {
 	private EReaderSignal readerSignal;
 	private EClientSocket clientSocket;
@@ -44,6 +42,58 @@ public class EWrapperImpl implements EWrapper {
 	public int getCurrentOrderId() {
 		return currentOrderId;
 	}
+
+    /**
+     * Handles the call back from reqRealTimeBar.
+     * Sets the opening price, if none, of a {@code ContractWithPriceDetail}
+     * Checks if ContractWithPriceDetail is ready for order submission
+     */
+    @Override
+    public void realtimeBar(int reqId, long time, double open, double high,
+                            double low, double close, long volume, double wap, int count) {
+        System.out.println("[EWrapperImpl] RealTimeBars. " + reqId + " - Time: " + time + ", Open: " + open
+                + ", High: " + high + ", Low: " + low + ", Close: " + close);
+
+        // retrieve contract by reqId
+        ContractWithPriceDetail contract = model.retrieveContractWithPriceDetailByReqId(reqId);
+
+        setOpeningPrice(contract, open);
+
+        // temporary print log
+        System.out.println("has fallen by 16%: " + isReadyForOrderSubmission(contract, open));
+
+        if (isReadyForOrderSubmission(contract, open)) {
+
+        }
+    }
+
+    /**
+     * Sets opening price of stock in {@see ContractWithPriceDetail} by reqId only if opening price is not set.
+     * Handles the exception thrown when trying to set the opening price for a ContractWithPriceDetails when there
+     * already is an opening price stored.
+     */
+    private void setOpeningPrice(ContractWithPriceDetail contract, double openingPrice) {
+        if (!contract.hasOpeningPrice()) {
+            try {
+                contract.setDayOpeningPrice(openingPrice);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        // temporary print log
+        System.out.println(contract.symbol() + " opening price should always be this value: " + contract.getDayOpeningPrice());
+    }
+
+    /**
+     * Takes in the {@param currentPrice} and checks if a ContractWithPriceDetail is ready to be submitted for
+     * ordering at the current price (i.e. meets the 16% decrease criteria)
+     * @return true if ContractWithPriceDetail can be submitted for purchase
+     */
+    private boolean isReadyForOrderSubmission(ContractWithPriceDetail contract, double currentPrice) {
+        System.out.println(contract.symbol() + "'s current trade price is " + currentPrice);
+        return contract.hasFallenBelowPercentage(currentPrice);
+    }
 	
 
 	@Override
@@ -270,48 +320,6 @@ public class EWrapperImpl implements EWrapper {
 	//! [scannerdataend]
 
 
-	/**
-	 * Handles the call back from reqRealTimeBar
-	 */
-	@Override
-	public void realtimeBar(int reqId, long time, double open, double high,
-			double low, double close, long volume, double wap, int count) {
-		System.out.println("[EWrapperImpl] RealTimeBars. " + reqId + " - Time: " + time + ", Open: " + open
-                + ", High: " + high + ", Low: " + low + ", Close: " + close);
-
-		setOpeningPrice(reqId, open);
-		System.out.println("has fallen by 16%: " + isReadyForOrderSubmission(reqId, open));
-	}
-
-	/**
-     * Sets opening price of stock in {@see ContractWithPriceDetail} by reqId only if opening price is not set.
-     * Handles the exception thrown when trying to set the opening price for a ContractWithPriceDetails when there
-     * already is an opening price stored.
-     */
-	private void setOpeningPrice(int reqId, double openingPrice) {
-        ContractWithPriceDetail contract = model.retrieveContractWithPriceDetailByReqId(reqId);
-        if (!contract.hasOpeningPrice()) {
-            try {
-                contract.setDayOpeningPrice(openingPrice);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        // temporary print log
-        System.out.println(contract.symbol() + " opening price should always be this value: " + contract.getDayOpeningPrice());
-    }
-
-    /**
-     * Takes in the {@param currentPrice} and checks if a ContractWithPriceDetail retrieved by {@param reqId}
-     * is ready to be submitted for ordering at the current price (i.e. meets the 16% decrease criteria)
-     * @return true if ContractWithPriceDetail can be submitted for purchase
-     */
-    private boolean isReadyForOrderSubmission(int reqId, double currentPrice) {
-        ContractWithPriceDetail contract = model.retrieveContractWithPriceDetailByReqId(reqId);
-        System.out.println(contract.symbol() + "'s current trade price is " + currentPrice);
-        return contract.hasFallenBelowPercentage(currentPrice);
-    }
 
 	@Override
 	public void currentTime(long time) {
