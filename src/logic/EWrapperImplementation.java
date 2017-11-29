@@ -22,6 +22,7 @@ public class EWrapperImplementation implements EWrapper {
         clientSocket = new EClientSocket(this, readerSignal);
     }
 
+    //@@author zenghou
     public EWrapperImplementation(Model model) {
         this(); // calls default constructor
         setModel(model);
@@ -94,6 +95,7 @@ public class EWrapperImplementation implements EWrapper {
         System.out.println(contract.symbol() + "'s current trade price is " + currentPrice);
         return contract.hasFallenBelowPercentage(currentPrice);
     }
+    //@@author
 
     @Override
     public void tickPrice(int tickerId, int field, double price, TickAttr attribs) {
