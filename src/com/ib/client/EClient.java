@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import com.ib.client.Types.SecType;
 
@@ -96,6 +97,8 @@ public abstract class EClient {
 	// 64 = can receive solicited attrib in openOrder message
 	// 65 = can receive verifyAndAuthMessageAPI and verifyAndAuthCompleted messages
 	// 66 = can receive randomize size and randomize price order fields
+
+    private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     protected static final int REDIRECT_COUNT_MAX = 2;
 
@@ -891,8 +894,11 @@ public abstract class EClient {
    }
     
     
-    public synchronized void reqRealTimeBars(int tickerId, Contract contract, int barSize, String whatToShow, boolean useRTH, List<TagValue> realTimeBarsOptions) {
-        System.out.println("[EClient] sending request for real time bars");
+    public synchronized void reqRealTimeBars(int tickerId, Contract contract, int barSize, String whatToShow,
+                                             boolean useRTH, List<TagValue> realTimeBarsOptions) {
+        LOGGER.info("=============================[ Sending request to IB for " + contract.symbol() +
+                " ]=============================");
+
         // not connected?
         if( !isConnected()) {
             notConnected();
