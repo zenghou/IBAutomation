@@ -1,8 +1,14 @@
 //@@author zenghou
+import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+
 import com.ib.client.EClientSocket;
 import com.ib.client.EReader;
 import com.ib.client.EReaderSignal;
-
 
 import logic.EWrapperImplementation;
 import logic.Logic;
@@ -11,6 +17,8 @@ import model.Model;
 import model.ModelManager;
 
 public class MainApp {
+    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
     private EWrapperImplementation eWrapper; // Mechanism through which TWS delivers information to client app
     private EClientSocket eClientSocket; // Mechanism through which client app delivers information to TWS
     private EReaderSignal eReaderSignal;
@@ -20,6 +28,8 @@ public class MainApp {
     protected Model model;
 
     public void init() throws Exception {
+        LOGGER.log(Level.INFO, "=============================[ Initializing IB Automatic Trading ]===========================");
+
         model = new ModelManager();
 
         eWrapper = new EWrapperImplementation(model);
@@ -52,6 +62,7 @@ public class MainApp {
     }
 
     public static void main(String[] args) throws Exception {
+        MainApp.initLogger();
         MainApp mainApp = new MainApp();
         mainApp.init();
         mainApp.logic.getRealTimeBars();
@@ -63,7 +74,25 @@ public class MainApp {
      * Disconnects the client app
      */
     public void stop() {
-        System.out.println("User has requested to terminate this session");
+        LOGGER.log(Level.INFO, "=============================[ Terminating Session ]===========================");
+
         eClientSocket.eDisconnect();
+    }
+
+    /**
+     * Sets up the logger and its handlers for console and file output.
+     */
+    public static void initLogger() throws Exception {
+        LogManager.getLogManager().reset();
+        LOGGER.setLevel(Level.ALL);
+
+        ConsoleHandler consoleHandler = new ConsoleHandler();
+        consoleHandler.setLevel(Level.INFO);
+        LOGGER.addHandler(consoleHandler);
+
+        FileHandler fileHandler = new FileHandler("IBAutomaticTradingLog");
+        fileHandler.setFormatter(new SimpleFormatter());
+        fileHandler.setLevel(Level.INFO);
+        LOGGER.addHandler(fileHandler);
     }
 }
