@@ -24,6 +24,11 @@ public class UniqueOrderContractList extends UniqueContractList {
         this.logic = logic;
     }
 
+    /**
+     * Adds {@code ContractWithPriceDetail} to UniqueOrderContractList and notifies logic to submit order
+     * * Could consider using Google's event bus/Observer & Subscriber model to reduce coupling
+     *
+     */
     @Override
     public void addContract(ContractWithPriceDetail contract) throws FullContractListException,
             DuplicateContractException {
@@ -33,7 +38,6 @@ public class UniqueOrderContractList extends UniqueContractList {
 
     /**
      * Asks Logic to send order when ContractWithPriceDetail is added to UniqueContractOrderList
-     * Could consider using Google's event bus/Observer & Subscriber model to reduce coupling
      * @param contract
      */
     private void newContractAddedNotifyLogicToSendOrder (ContractWithPriceDetail contract) {
