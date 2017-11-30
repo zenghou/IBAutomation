@@ -11,10 +11,10 @@ import model.Model;
 import model.ModelManager;
 
 public class MainApp {
-    protected EWrapperImplementation eWrapper; // Mechanism through which TWS delivers information to client app
-    protected EClientSocket eClientSocket; // Mechanism through which client app delivers information to TWS
-    protected EReaderSignal eReaderSignal;
-    protected EReader eReader;
+    private EWrapperImplementation eWrapper; // Mechanism through which TWS delivers information to client app
+    private EClientSocket eClientSocket; // Mechanism through which client app delivers information to TWS
+    private EReaderSignal eReaderSignal;
+    private EReader eReader;
 
     protected Logic logic;
     protected Model model;
