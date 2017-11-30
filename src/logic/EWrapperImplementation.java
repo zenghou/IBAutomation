@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.ib.client.*;
 
@@ -12,10 +13,13 @@ import model.ContractWithPriceDetail;
 import model.Model;
 
 public class EWrapperImplementation implements EWrapper {
+    private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
     private EReaderSignal readerSignal;
     private EClientSocket clientSocket;
     private Model model;
-    protected int currentOrderId = -1;
+
+    private int currentOrderId = -1;
 
     public EWrapperImplementation() {
         readerSignal = new EJavaSignal();
@@ -52,18 +56,20 @@ public class EWrapperImplementation implements EWrapper {
     @Override
     public void realtimeBar(int reqId, long time, double open, double high,
                             double low, double close, long volume, double wap, int count) {
-        System.out.println("[EWrapperImpl] RealTimeBars. " + reqId + " - Time: " + time + ", Open: " + open
-                + ", High: " + high + ", Low: " + low + ", Close: " + close);
-
         // retrieve contract by reqId
         ContractWithPriceDetail contract = model.retrieveContractWithPriceDetailByReqId(reqId);
 
+        LOGGER.info("=============================[ Handling realTimeBars callback for " +  contract.symbol() +
+                " ]===========================");
+
+//        System.out.println("[EWrapperImpl] RealTimeBars. " + reqId + " - Time: " + time + ", Open: " + open
+//                + ", High: " + high + ", Low: " + low + ", Close: " + close);
+
         setOpeningPrice(contract, open);
 
-        // temporary print log
-        System.out.println("has fallen by 16%: " + isReadyForOrderSubmission(contract, open));
-
         if (isReadyForOrderSubmission(contract, open)) {
+            LOGGER.info("=============================[ " +  contract.symbol() +
+                    " is ready for order submission! ]===========================");
             model.addContractWithPriceDetailToOrderList(contract);
         }
     }
@@ -76,14 +82,16 @@ public class EWrapperImplementation implements EWrapper {
     private void setOpeningPrice(ContractWithPriceDetail contract, double openingPrice) {
         if (!contract.hasOpeningPrice()) {
             try {
+                LOGGER.info("=============================[ Assigning for the first time an opening price to " +
+                        contract.symbol() + " ]=============================");
+
                 contract.setDayOpeningPrice(openingPrice);
             } catch (Exception e) {
+                LOGGER.severe("=============================[ Assigning opening price to " + contract.symbol() +
+                        " that already has an opening price! ]=============================");
                 e.printStackTrace();
             }
         }
-
-        // temporary print log
-        System.out.println(contract.symbol() + " opening price should always be this value: " + contract.getDayOpeningPrice());
     }
 
     /**
@@ -92,7 +100,9 @@ public class EWrapperImplementation implements EWrapper {
      * @return true if ContractWithPriceDetail can be submitted for purchase
      */
     private boolean isReadyForOrderSubmission(ContractWithPriceDetail contract, double currentPrice) {
-        System.out.println(contract.symbol() + "'s current trade price is " + currentPrice);
+        LOGGER.info("=============================[ Checking if " + contract.symbol() +
+                " is ready for order submission ]=============================");
+
         return contract.hasFallenBelowPercentage(currentPrice);
     }
     //@@author
