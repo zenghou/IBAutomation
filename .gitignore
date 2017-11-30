@@ -38,3 +38,5 @@ out/production/IBSample/com/ib/client/EClient\.class
 \.DS_Store
 
 out/production/IBSample/logic/EWrapperImplementation\.class
+
+IBAutomaticTradingLog
