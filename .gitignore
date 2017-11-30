@@ -36,3 +36,5 @@ out/production/IBSample/model/ContractWithPriceDetail\.class
 out/production/IBSample/com/ib/client/EClient\.class
 
 \.DS_Store
+
+out/production/IBSample/logic/EWrapperImplementation\.class
