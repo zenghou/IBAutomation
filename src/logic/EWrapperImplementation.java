@@ -65,32 +65,11 @@ public class EWrapperImplementation implements EWrapper {
 //        System.out.println("[EWrapperImpl] RealTimeBars. " + reqId + " - Time: " + time + ", Open: " + open
 //                + ", High: " + high + ", Low: " + low + ", Close: " + close);
 
-        setOpeningPrice(contract, open);
-
-        if (isReadyForOrderSubmission(contract, open)) {
+        if (isReadyForOrderSubmissionAtCurrentPrice(contract, open)) {
             LOGGER.info("=============================[ " +  contract.symbol() +
                     " is ready for order submission! ]===========================");
+
             model.addContractWithPriceDetailToOrderList(contract);
-        }
-    }
-
-    /**
-     * Sets opening price of stock in {@see ContractWithPriceDetail} by reqId only if opening price is not set.
-     * Handles the exception thrown when trying to set the opening price for a ContractWithPriceDetails when there
-     * already is an opening price stored.
-     */
-    private void setOpeningPrice(ContractWithPriceDetail contract, double openingPrice) {
-        if (!contract.hasOpeningPrice()) {
-            try {
-                LOGGER.info("=============================[ Assigning for the first time an opening price to " +
-                        contract.symbol() + " ]=============================");
-
-                contract.setDayOpeningPrice(openingPrice);
-            } catch (Exception e) {
-                LOGGER.severe("=============================[ Assigning opening price to " + contract.symbol() +
-                        " that already has an opening price! ]=============================");
-                e.printStackTrace();
-            }
         }
     }
 
@@ -99,7 +78,7 @@ public class EWrapperImplementation implements EWrapper {
      * ordering at the current price (i.e. meets the 16% decrease criteria)
      * @return true if ContractWithPriceDetail can be submitted for purchase
      */
-    private boolean isReadyForOrderSubmission(ContractWithPriceDetail contract, double currentPrice) {
+    private boolean isReadyForOrderSubmissionAtCurrentPrice(ContractWithPriceDetail contract, double currentPrice) {
         LOGGER.info("=============================[ Checking if " + contract.symbol() +
                 " is ready for order submission ]=============================");
 
