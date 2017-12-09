@@ -40,3 +40,7 @@ out/production/IBSample/com/ib/client/EClient\.class
 out/production/IBSample/logic/EWrapperImplementation\.class
 
 IBAutomaticTradingLog
+
+out/production/IBSample/logic/ScheduledOrderCheck\.class
+
+out/production/IBSample/model/ContractBuilder\.class
