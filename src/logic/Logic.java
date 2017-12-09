@@ -19,16 +19,6 @@ public interface Logic {
     void placeLimitBuyOrder(ContractWithPriceDetail contract);
 
     /**
-     * Determines if stock's current price is below opening price by {@code percentage}
-     */
-    boolean hasFallenByPercentage(Contract contract, int percentage);
-
-    /**
-     * Gets the opening price of a stock symbol
-     */
-    double getOpeningPrice(String stockSymbol);
-
-    /**
      * Cancels the current realtimebar subscription
      */
     void cancelRealTimeBars();
