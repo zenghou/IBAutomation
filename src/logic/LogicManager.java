@@ -22,7 +22,7 @@ public class LogicManager implements Logic {
     public LogicManager(Model modelManager, EClientSocket eClientSocket) {
         this.model = modelManager;
         this.eClientSocket = eClientSocket;
-        Parser parser = new Parser("/Users/ZengHou/Desktop/testStockList.csv", model);
+        Parser parser = new Parser("/Users/ZengHou/Desktop/tickersWithPrice.csv", model);
         parser.readDataUpdateModel();
 
         // called after listOfSymbol is populated by parser#readDataUpdateModel()
@@ -85,7 +85,8 @@ public class LogicManager implements Logic {
 
     @Override
     public void placeLimitBuyOrder(ContractWithPriceDetail contractWithPriceDetail) {
-        double limitPrice = contractWithPriceDetail.getCurrentPrice();
+        // TODO: 0.7 is just a test value
+        double limitPrice = contractWithPriceDetail.getDayOpeningPrice() * 0.7;
 
         assert(limitPrice > 0);
 
@@ -109,15 +110,5 @@ public class LogicManager implements Logic {
     /** Calculates the number of shares that can be purchased with {@code sum} at {@code purchasePrice}*/
     private int calculateSharesBuyableWithSumAtPrice(double sum, double purchasePrice) {
         return (int) Math.floor(sum/purchasePrice);
-    }
-
-    @Override
-    public boolean hasFallenByPercentage(Contract contract, int percentage) {
-        return false;
-    }
-
-    @Override
-    public double getOpeningPrice(String stockSymbol) {
-        return 0;
     }
 }
