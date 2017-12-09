@@ -33,24 +33,15 @@ public class Parser {
      * Reads CSV file from filepath with Scanner and adds each symbol into Model's {@code listOfSymbols}
      */
     public void readDataUpdateModel() {
-        while (scanner.hasNext()) {
-            model.getListOfSymbolsArray().add(scanner.next());
+        while (scanner.hasNextLine()) {
+            // separate each line with a space
+            String eachLine = scanner.nextLine();
+            String[] tickerPriceList = eachLine.split(" ");
+            String ticker = tickerPriceList[0];
+            Double price = Double.parseDouble(tickerPriceList[1]);
+
+            HashMap<String, Double> tickerPriceHashMap = model.getTickerPriceHashMap();
+            tickerPriceHashMap.put(ticker, price);
         }
     }
-
-//    /**
-//     * Reads CSV file from filepath with Scanner and adds each symbol and price into Model's {@code tickerPriceHashMap}
-//     */
-//    public void readDataUpdateModel() {
-//        while (scanner.hasNextLine()) {
-//            // separate each line with a space
-//            String eachLine = scanner.nextLine();
-//            String[] tickerPriceList = eachLine.split(" ");
-//            String ticker = tickerPriceList[0];
-//            Double price = Double.parseDouble(tickerPriceList[1]);
-//
-//            HashMap<String, Double> tickerPriceHashMap = model.getTickerPriceHashMap();
-//            tickerPriceHashMap.put(ticker, price);
-//        }
-//    }
 }
