@@ -1,5 +1,5 @@
 //@@author zenghou
-package logic;
+package model;
 
 import com.ib.client.Contract;
 
