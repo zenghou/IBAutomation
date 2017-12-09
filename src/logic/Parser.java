@@ -30,7 +30,7 @@ public class Parser {
     }
 
     /**
-     * Reads CSV file from filepath with Scanner and adds each symbol into Model's {@code listOfSymbols}
+     * Reads CSV file from filepath with Scanner and adds each symbol into Model's {@code tickerPriceHashMap}
      */
     public void readDataUpdateModel() {
         while (scanner.hasNextLine()) {
