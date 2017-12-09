@@ -2,6 +2,8 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import logic.ContractBuilder;
 import model.exceptions.DuplicateContractException;
@@ -9,31 +11,31 @@ import model.exceptions.FullContractListException;
 
 public class ModelManager implements Model {
     /** List of symbols prepared after {@code Parser} reads the csv file */
-    private ArrayList<String> listOfSymbols;
+    private HashMap<String, Double> tickerPriceHashMap;
     private UniqueContractList uniqueContractList;
     private UniqueOrderContractList uniqueOrderContractList;
 
     public ModelManager() {
         uniqueContractList = new UniqueContractList();
-        listOfSymbols = new ArrayList<>();
+        tickerPriceHashMap = new HashMap<>();
 
         // uniqueOrderContractList holds at most 15 contracts
         uniqueOrderContractList = new UniqueOrderContractList(15);
     }
 
     /**
-     * Prepares the Model class by populating uniqueContractList and listOfSymbols.
-     * Can only be called when {@code listOfSymbols} is prepared.
+     * Prepares the Model class by populating uniqueContractList and tickerPriceHashMap.
+     * Can only be called when {@code tickerPriceHashMap} is prepared.
      */
     @Override
     public void initializeModel() {
         createUniqueContractList();
     }
 
-    /** Gives {@see Parser} access to listOfSymbols to populate with stock symbols */
+    /** Gives {@see Parser} access to tickerPriceHashMap to populate with stock symbols */
     @Override
-    public ArrayList<String> getListOfSymbolsArray() {
-        return listOfSymbols;
+    public HashMap<String, Double> getTickerPriceHashMap() {
+        return tickerPriceHashMap;
     }
 
     @Override
@@ -61,14 +63,17 @@ public class ModelManager implements Model {
     }
 
     /**
-     * Loops through all ticker symbols in {@code listOfSymbols}
-     * and adds the created Contract object into {@code uniqueContractList}.
+     * Loops through all ticker and price key-value pairs in {@code tickerPriceHashMap}
+     * and adds the created {@see ContractWithPriceDetail} object into {@code uniqueOrderContractList}.
      * Called only by {@link #initializeModel()}
      */
     private void createUniqueContractList() {
         try {
-            for (String symbol : listOfSymbols) {
-                uniqueContractList.addContract(ContractBuilder.buildContractWithPriceDetail(symbol));
+            for (Map.Entry<String, Double> entry: tickerPriceHashMap.entrySet()) {
+
+                String ticker = entry.getKey();
+                Double price = entry.getValue();
+                uniqueOrderContractList.addContract(ContractBuilder.buildContractWithPriceDetail(ticker, price));
             }
         } catch (DuplicateContractException dce) {
             System.out.println(dce.getMessage() + "\n" + "There should not be any duplicate symbols");

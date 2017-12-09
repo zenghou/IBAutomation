@@ -2,6 +2,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * The API of the model component
@@ -16,8 +17,8 @@ public interface Model {
     /** Sets up a model with a {@see listOfSymbols} and {@see UniqueContractList} */
     void initializeModel();
 
-    /** Returns an String arraylist for the {@see Parser} to populate with symbols */
-    ArrayList<String> getListOfSymbolsArray();
+    /** Returns an String Double Hash Map for the {@see Parser} to populate with ticker and prices */
+    HashMap<String, Double> getTickerPriceHashMap();
 
     /** Retrieves a ContractWithPriceDetails by requestId and returns it to caller*/
     ContractWithPriceDetail retrieveContractWithPriceDetailByReqId(int reqId);
