@@ -3,6 +3,7 @@ package logic;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import model.Model;
@@ -18,7 +19,6 @@ public class Parser {
         setModel(model);
         try {
             scanner = new Scanner(new File(filepath));
-            scanner.useDelimiter(",");
         } catch (FileNotFoundException fnfe) {
             fnfe.printStackTrace();
         }
@@ -37,4 +37,20 @@ public class Parser {
             model.getListOfSymbolsArray().add(scanner.next());
         }
     }
+
+//    /**
+//     * Reads CSV file from filepath with Scanner and adds each symbol and price into Model's {@code tickerPriceHashMap}
+//     */
+//    public void readDataUpdateModel() {
+//        while (scanner.hasNextLine()) {
+//            // separate each line with a space
+//            String eachLine = scanner.nextLine();
+//            String[] tickerPriceList = eachLine.split(" ");
+//            String ticker = tickerPriceList[0];
+//            Double price = Double.parseDouble(tickerPriceList[1]);
+//
+//            HashMap<String, Double> tickerPriceHashMap = model.getTickerPriceHashMap();
+//            tickerPriceHashMap.put(ticker, price);
+//        }
+//    }
 }
