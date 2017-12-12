@@ -72,7 +72,7 @@ public class ModelManager implements Model {
 
                 String ticker = entry.getKey();
                 Double price = entry.getValue();
-                uniqueOrderContractList.addContract(ContractBuilder.buildContractWithPriceDetail(ticker, price));
+                uniqueContractList.addContract(ContractBuilder.buildContractWithPriceDetail(ticker, price));
             }
         } catch (DuplicateContractException dce) {
             System.out.println(dce.getMessage() + "\n" + "There should not be any duplicate symbols");
@@ -87,9 +87,12 @@ public class ModelManager implements Model {
      * to be ready for order submission {@link ContractWithPriceDetail#hasFallenBelowPercentage(double)}.
      */
     public void addContractWithPriceDetailToOrderList(ContractWithPriceDetail contractWithPriceDetail) {
+        // TODO: check for size of OrderList; if maximum size, stop requesting for data.
         try {
             uniqueOrderContractList.addContract(contractWithPriceDetail);
         } catch (DuplicateContractException dce) {
+            // TODO: Remove this temp print log
+            uniqueOrderContractList.printAll();
             System.out.println(dce.getMessage() + "\n" + "There should not be any duplicate symbols");
         } catch (FullContractListException fcle) {
             System.out.println(fcle.getMessage()+ "\n" + "Additional contracts should not be added to a full" +
