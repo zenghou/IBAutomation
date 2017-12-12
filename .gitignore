@@ -44,3 +44,5 @@ IBAutomaticTradingLog
 out/production/IBSample/logic/ScheduledOrderCheck\.class
 
 out/production/IBSample/model/ContractBuilder\.class
+
+out/production/IBSample/Logic/Logic\.class
