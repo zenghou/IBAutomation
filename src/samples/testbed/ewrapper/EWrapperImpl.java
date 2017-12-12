@@ -53,37 +53,8 @@ public class EWrapperImpl implements EWrapper {
                             double low, double close, long volume, double wap, int count) {
         System.out.println("[EWrapperImpl] RealTimeBars. " + reqId + " - Time: " + time + ", Open: " + open
                 + ", High: " + high + ", Low: " + low + ", Close: " + close);
-
-        // retrieve contract by reqId
-        ContractWithPriceDetail contract = model.retrieveContractWithPriceDetailByReqId(reqId);
-
-        setOpeningPrice(contract, open);
-
-        // temporary print log
-        System.out.println("has fallen by 16%: " + isReadyForOrderSubmission(contract, open));
-
-        if (isReadyForOrderSubmission(contract, open)) {
-
-        }
     }
 
-    /**
-     * Sets opening price of stock in {@see ContractWithPriceDetail} by reqId only if opening price is not set.
-     * Handles the exception thrown when trying to set the opening price for a ContractWithPriceDetails when there
-     * already is an opening price stored.
-     */
-    private void setOpeningPrice(ContractWithPriceDetail contract, double openingPrice) {
-        if (!contract.hasOpeningPrice()) {
-            try {
-                contract.setDayOpeningPrice(openingPrice);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        // temporary print log
-        System.out.println(contract.symbol() + " opening price should always be this value: " + contract.getDayOpeningPrice());
-    }
 
     /**
      * Takes in the {@param currentPrice} and checks if a ContractWithPriceDetail is ready to be submitted for
