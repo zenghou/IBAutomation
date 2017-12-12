@@ -1,6 +1,8 @@
 //@@author zenghou
 package model;
 
+import java.util.ArrayList;
+
 import logic.Logic;
 import model.exceptions.DuplicateContractException;
 import model.exceptions.FullContractListException;
@@ -45,5 +47,13 @@ public class UniqueOrderContractList extends UniqueContractList {
         assert(logic != null);
 
         logic.placeLimitBuyOrder(contract);
+    }
+
+    public void printAll() {
+        ArrayList<ContractWithPriceDetail> array = getContractArrayWithPriceDetailList();
+        System.out.println("currently in ORDER LIST");
+        for (ContractWithPriceDetail contract: array) {
+            System.out.println(contract.symbol());
+        }
     }
 }
