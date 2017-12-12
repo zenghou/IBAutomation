@@ -35,7 +35,12 @@ public class UniqueOrderContractList extends UniqueContractList {
     public void addContract(ContractWithPriceDetail contract) throws FullContractListException,
             DuplicateContractException {
         super.addContract(contract);
+
+        // notify Logic to send order
         newContractAddedNotifyLogicToSendOrder(contract);
+
+        // notify Logic to stop requesting real time bars for contract
+        cancelRealTimeBarRequestForContract(contract);
     }
 
     /**
@@ -47,6 +52,10 @@ public class UniqueOrderContractList extends UniqueContractList {
         assert(logic != null);
 
         logic.placeLimitBuyOrder(contract);
+    }
+
+    private void cancelRealTimeBarRequestForContract(ContractWithPriceDetail contract) {
+        logic.cancelRealTimeBarsForContract(contract);
     }
 
     public void printAll() {
