@@ -36,7 +36,7 @@ public class MainApp {
         eClientSocket = eWrapper.getClient();
         eReaderSignal = eWrapper.getSignal();
 
-        logic = new LogicManager(model, eClientSocket);
+        logic = new LogicManager(model, eClientSocket, eWrapper);
 
         // Connect to server
         eClientSocket.eConnect("127.0.0.1", 7496, 0);
