@@ -3,7 +3,6 @@ package logic;
 
 import java.util.logging.Logger;
 
-import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 import com.ib.client.Order;
 
@@ -15,13 +14,16 @@ public class LogicManager implements Logic {
 
     private Model model;
     private EClientSocket eClientSocket;
+    private EWrapperImplementation eWrapperImplementation;
 
     private int requestId = 1;
     private int orderId = 1;
 
-    public LogicManager(Model modelManager, EClientSocket eClientSocket) {
+    public LogicManager(Model modelManager, EClientSocket eClientSocket, EWrapperImplementation eWrapperImplementation) {
         this.model = modelManager;
         this.eClientSocket = eClientSocket;
+        this.eWrapperImplementation = eWrapperImplementation;
+
         Parser parser = new Parser("/Users/ZengHou/Desktop/tickersWithPrice.csv", model);
         parser.readDataUpdateModel();
 
@@ -63,6 +65,12 @@ public class LogicManager implements Logic {
         }
     }
 
+    @Override
+    public void cancelRealTimeBarsForContract(ContractWithPriceDetail contract) {
+        int contractRequestId = contract.getRequestId();
+        eClientSocket.cancelRealTimeBars(contractRequestId);
+    }
+
     /**
      * Private method to be called by {@code getRealTimeBars}
      * Although setting of requestId for a ContractWithPriceDetail is fairly simple, it is extracted in to abide by
@@ -85,8 +93,8 @@ public class LogicManager implements Logic {
 
     @Override
     public void placeLimitBuyOrder(ContractWithPriceDetail contractWithPriceDetail) {
-        // TODO: 0.7 is just a test value
-        double limitPrice = contractWithPriceDetail.getDayOpeningPrice() * 0.7;
+        // TODO: 0.5 is just a test value
+        double limitPrice = contractWithPriceDetail.getDayOpeningPrice() * 0.2;
 
         assert(limitPrice > 0);
 
@@ -94,7 +102,16 @@ public class LogicManager implements Logic {
 
         Order orderToBeSubmitted = createLimitBuyOrder(quantityToBePurchased, limitPrice);
 
-        eClientSocket.placeOrder(orderId++, contractWithPriceDetail, orderToBeSubmitted);
+        LOGGER.severe("=============================[ Attempting to place order for " + quantityToBePurchased + " of " +
+                contractWithPriceDetail.symbol() + " at " + limitPrice + " ]===========================");
+
+        int currentOrderId = eWrapperImplementation.getCurrentOrderId();
+
+        eClientSocket.placeOrder(currentOrderId, contractWithPriceDetail, orderToBeSubmitted);
+
+        eWrapperImplementation.incrementOrderId();
+
+        System.out.println("Current id: " + currentOrderId + " next valid is: " + eWrapperImplementation.getCurrentOrderId());
     }
 
     /** Creates a buy order of {@code quantity} at {@code limitPrice} */

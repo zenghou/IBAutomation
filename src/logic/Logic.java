@@ -16,7 +16,13 @@ public interface Logic {
     void placeLimitBuyOrder(ContractWithPriceDetail contract);
 
     /**
-     * Cancels the current realtimebar subscription
+     * Cancels the all current real time bar subscription
      */
     void cancelRealTimeBars();
+
+    /**
+     * Cancels the real time bar subscription for {@code ContractWithPriceDetail}
+     */
+    void cancelRealTimeBarsForContract(ContractWithPriceDetail contract);
+
 }
