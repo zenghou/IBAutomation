@@ -87,8 +87,8 @@ public class EWrapperImplementation implements EWrapper {
      * @return true if ContractWithPriceDetail can be submitted for purchase
      */
     private boolean isReadyForOrderSubmissionAtCurrentPrice(ContractWithPriceDetail contract, double currentPrice) {
-        LOGGER.info("=============================[ Checking if " + contract.symbol() +
-                " is ready for order submission ]=============================");
+//        LOGGER.info("=============================[ Checking if " + contract.symbol() +
+//                " is ready for order submission ]=============================");
 
         return contract.hasFallenBelowPercentage(currentPrice);
     }
