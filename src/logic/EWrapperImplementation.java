@@ -48,6 +48,10 @@ public class EWrapperImplementation implements EWrapper {
         return currentOrderId;
     }
 
+    public void incrementOrderId() {
+        currentOrderId++;
+    }
+
     /**
      * Handles the call back from reqRealTimeBar.
      * Sets the opening price, if none, of a {@code ContractWithPriceDetail}
@@ -69,8 +73,12 @@ public class EWrapperImplementation implements EWrapper {
             LOGGER.info("=============================[ " +  contract.symbol() +
                     " is ready for order submission! ]===========================");
 
-            model.addContractWithPriceDetailToOrderList(contract);
+            addContractToUniqueOrderList(contract);
         }
+    }
+
+    private void addContractToUniqueOrderList(ContractWithPriceDetail contract) {
+        model.addContractWithPriceDetailToOrderList(contract);
     }
 
     /**
