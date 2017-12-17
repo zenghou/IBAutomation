@@ -10,10 +10,10 @@ public interface Logic {
     void getRealTimeBars() throws InterruptedException;
 
     /**
-     * Takes in a {@code stock} whose current price is 16% below opening price
-     * and executes a Limit Buy order.
+     * Takes in a {@code stock} whose current price is {@code percentageBelow}  opening price
+     * and executes a Limit Buy order of a maximum number of shares with {@code sum} amount of money.
      */
-    void placeLimitBuyOrder(ContractWithPriceDetail contract);
+    void placeLimitBuyOrder(ContractWithPriceDetail contract, double percentageBelow, double sum);
 
     /**
      * Cancels the all current real time bar subscription
