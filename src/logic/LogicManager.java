@@ -1,6 +1,7 @@
 //@@author zenghou
 package logic;
 
+import java.text.DecimalFormat;
 import java.util.logging.Logger;
 
 import com.ib.client.EClientSocket;
@@ -17,7 +18,6 @@ public class LogicManager implements Logic {
     private EWrapperImplementation eWrapperImplementation;
 
     private int requestId = 1;
-    private int orderId = 1;
 
     public LogicManager(Model modelManager, EClientSocket eClientSocket, EWrapperImplementation eWrapperImplementation) {
         this.model = modelManager;
@@ -92,13 +92,17 @@ public class LogicManager implements Logic {
     }
 
     @Override
-    public void placeLimitBuyOrder(ContractWithPriceDetail contractWithPriceDetail) {
-        // TODO: 0.5 is just a test value
-        double limitPrice = contractWithPriceDetail.getDayOpeningPrice() * 0.2;
+    public void placeLimitBuyOrder(ContractWithPriceDetail contractWithPriceDetail, double percentageBelow, double sum) {
+        // e.g. (100 - 16) = 84% would mean 0.84
+        double percentage = (100.00 - percentageBelow)/100.00;
+
+        double unformattedLimitPrice = contractWithPriceDetail.getDayOpeningPrice() * percentage;
+
+        double limitPrice = formatOrderPrice(unformattedLimitPrice);
 
         assert(limitPrice > 0);
 
-        int quantityToBePurchased = calculateSharesBuyableWithSumAtPrice(300.00, limitPrice);
+        int quantityToBePurchased = calculateSharesBuyableWithSumAtPrice(sum, limitPrice);
 
         Order orderToBeSubmitted = createLimitBuyOrder(quantityToBePurchased, limitPrice);
 
@@ -112,6 +116,24 @@ public class LogicManager implements Logic {
         eWrapperImplementation.incrementOrderId();
 
         System.out.println("Current id: " + currentOrderId + " next valid is: " + eWrapperImplementation.getCurrentOrderId());
+    }
+
+    /**
+     * Formats the order price of a stock. If price is $1 and below, round down to nearest 4 decimal places. Otherwise,
+     * price will be rounded off to the nearest 2 decimal places.
+     */
+    private double formatOrderPrice(double price) {
+        DecimalFormat decimalFormat;
+
+        if (price <= 1.00) {
+            decimalFormat = new DecimalFormat("0.0000");
+        } else {
+            decimalFormat = new DecimalFormat("0.00");
+        }
+
+        String formatted = decimalFormat.format(price);
+
+        return Double.valueOf(formatted);
     }
 
     /** Creates a buy order of {@code quantity} at {@code limitPrice} */
