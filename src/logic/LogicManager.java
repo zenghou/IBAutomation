@@ -2,6 +2,7 @@
 package logic;
 
 import java.text.DecimalFormat;
+import java.util.Observable;
 import java.util.logging.Logger;
 
 import com.ib.client.EClientSocket;
@@ -10,12 +11,13 @@ import com.ib.client.Order;
 import model.ContractWithPriceDetail;
 import model.Model;
 
-public class LogicManager implements Logic {
+public class LogicManager implements Logic{
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private Model model;
     private EClientSocket eClientSocket;
     private EWrapperImplementation eWrapperImplementation;
+    private Parser parser;
 
     private int requestId = 1;
 
@@ -24,7 +26,7 @@ public class LogicManager implements Logic {
         this.eClientSocket = eClientSocket;
         this.eWrapperImplementation = eWrapperImplementation;
 
-        Parser parser = new Parser("/Users/ZengHou/Desktop/tickersWithPrice.csv", model);
+        parser = new Parser("/Users/ZengHou/Desktop/tickersWithPrice.csv", model);
         parser.readDataUpdateModel();
 
         // called after listOfSymbol is populated by parser#readDataUpdateModel()
@@ -59,6 +61,30 @@ public class LogicManager implements Logic {
     }
 
     @Override
+    public Parser getParser() {
+        return parser;
+    }
+
+    /**
+     * Similar to {@see getRealTimeBars} except that the data for a specific stock is submitted. This method is used for
+     * requesting data of a stock that is newly added to the {@see UniqueContractList}
+     * @param contract
+     * @throws InterruptedException
+     */
+    private void getRealTimeBarsForContract(ContractWithPriceDetail contract) throws InterruptedException {
+        LOGGER.info("=============================[ Req " + requestId + ": Retrieving price for newly added " +
+                contract.symbol() + " ]=============================");
+
+        // set unique req Id for each contract
+        setRequestIdForContractWithPriceDetail(requestId, contract);
+
+        eClientSocket.reqRealTimeBars(requestId, contract, 5, "MIDPOINT",
+                true, null);
+
+        requestId++;
+    }
+
+    @Override
     public void cancelRealTimeBars() {
         for (int i = 1; i < requestId; i++) {
             eClientSocket.cancelRealTimeBars(i);
@@ -69,6 +95,9 @@ public class LogicManager implements Logic {
     public void cancelRealTimeBarsForContract(ContractWithPriceDetail contract) {
         int contractRequestId = contract.getRequestId();
         eClientSocket.cancelRealTimeBars(contractRequestId);
+
+        // temp print log
+        System.out.println("cancelling request for " + contract.symbol());
     }
 
     /**
@@ -149,5 +178,15 @@ public class LogicManager implements Logic {
     /** Calculates the number of shares that can be purchased with {@code sum} at {@code purchasePrice}*/
     private int calculateSharesBuyableWithSumAtPrice(double sum, double purchasePrice) {
         return (int) Math.floor(sum/purchasePrice);
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        ContractWithPriceDetail contract = (ContractWithPriceDetail) arg;
+        try {
+            getRealTimeBarsForContract(contract);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

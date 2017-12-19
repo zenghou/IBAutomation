@@ -1,9 +1,11 @@
 //@@author zenghou
 package logic;
 
+import java.util.Observer;
+
 import model.ContractWithPriceDetail;
 
-public interface Logic {
+public interface Logic extends Observer {
     /**
      * Get real-time stock prices
      */
@@ -24,5 +26,8 @@ public interface Logic {
      * Cancels the real time bar subscription for {@code ContractWithPriceDetail}
      */
     void cancelRealTimeBarsForContract(ContractWithPriceDetail contract);
+
+    /** Returns the Parser object used */
+    Parser getParser();
 
 }
