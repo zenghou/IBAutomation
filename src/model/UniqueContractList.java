@@ -2,6 +2,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Observable;
 
 import model.exceptions.DuplicateContractException;
 import model.exceptions.FullContractListException;
@@ -9,7 +10,7 @@ import model.exceptions.FullContractListException;
 /**
  * Stores a list of unique ContractWithPriceDetail which are to be monitored with live stream of price data
  */
-public class UniqueContractList {
+public class UniqueContractList extends Observable {
     private final int DEFAULT_ARRAY_SIZE = 1000;
     // default array size will be 1000
     private int arraySize = DEFAULT_ARRAY_SIZE;
@@ -36,6 +37,15 @@ public class UniqueContractList {
             throw new DuplicateContractException();
         }
         contractWithPriceDetailArrayList.add(contract);
+    }
+
+    public void updateContractList(ContractWithPriceDetail contract) throws FullContractListException,
+            DuplicateContractException {
+        addContract(contract);
+
+        // notify observers
+        setChanged();
+        notifyObservers(contract);
     }
 
     public void removeContract(ContractWithPriceDetail contract) {
