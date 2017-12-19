@@ -63,8 +63,8 @@ public class EWrapperImplementation implements EWrapper {
         // retrieve contract by reqId
         ContractWithPriceDetail contract = model.retrieveContractWithPriceDetailByReqId(reqId);
 
-        LOGGER.info("=============================[ Handling realTimeBars callback for " +  contract.symbol() +
-                " ]===========================");
+//        LOGGER.info("=============================[ Handling realTimeBars callback for " +  contract.symbol() +
+//                " ]===========================");
 
 //        System.out.println("[EWrapperImpl] RealTimeBars. " + reqId + " - Time: " + time + ", Open: " + open
 //                + ", High: " + high + ", Low: " + low + ", Close: " + close);
