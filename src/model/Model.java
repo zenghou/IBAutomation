@@ -28,4 +28,6 @@ public interface Model {
 
     /** Adds a contract that is ready for purchase order to the UniqueOrderContractList */
     void addContractWithPriceDetailToOrderList(ContractWithPriceDetail contractWithPriceDetail);
+
+    void updateUniqueContractList(ContractWithPriceDetail contract);
 }

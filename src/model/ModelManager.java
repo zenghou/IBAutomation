@@ -82,6 +82,19 @@ public class ModelManager implements Model {
         }
     }
 
+    @Override
+    public void updateUniqueContractList(ContractWithPriceDetail contract) {
+        try {
+            //TODO: change to update contract method (to use observer/observable)
+            uniqueContractList.updateContractList(contract);
+        } catch (DuplicateContractException dce) {
+            System.out.println(dce.getMessage() + "\n" + "There should not be any duplicate for " + contract.symbol());
+        } catch (FullContractListException fcle) {
+            System.out.println(fcle.getMessage() + "\n" + "Additional contracts should not be added to a full" +
+                    "Contract list");
+        }
+    }
+
     /**
      * Adds a {@link ContractWithPriceDetail} to {@link UniqueOrderContractList} in ModelManager after it is checked
      * to be ready for order submission {@link ContractWithPriceDetail#hasFallenBelowPercentage(double)}.
@@ -93,7 +106,9 @@ public class ModelManager implements Model {
         } catch (DuplicateContractException dce) {
             // TODO: Remove this temp print log
             uniqueOrderContractList.printAll();
-            System.out.println(dce.getMessage() + "\n" + "There should not be any duplicate symbols");
+
+            System.out.println(dce.getMessage() + "\n" + "Duplicate symbol " + contractWithPriceDetail.symbol() +
+                    "should not be added!");
         } catch (FullContractListException fcle) {
             System.out.println(fcle.getMessage()+ "\n" + "Additional contracts should not be added to a full" +
                     "Contract list");
