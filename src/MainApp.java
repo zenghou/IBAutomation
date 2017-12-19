@@ -1,4 +1,5 @@
 //@@author zenghou
+import java.util.Timer;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -23,6 +24,7 @@ public class MainApp {
     private EClientSocket eClientSocket; // Mechanism through which client app delivers information to TWS
     private EReaderSignal eReaderSignal;
     private EReader eReader;
+    private Timer timer;
 
     protected Logic logic;
     protected Model model;
@@ -37,6 +39,10 @@ public class MainApp {
         eReaderSignal = eWrapper.getSignal();
 
         logic = new LogicManager(model, eClientSocket, eWrapper);
+
+        model.getUniqueContractList().addObserver(logic);
+
+        timer = new Timer();
 
         // Connect to server
         eClientSocket.eConnect("127.0.0.1", 7496, 0);
@@ -66,6 +72,7 @@ public class MainApp {
         MainApp mainApp = new MainApp();
         mainApp.init();
         mainApp.logic.getRealTimeBars();
+        mainApp.timer.schedule(mainApp.logic.getParser(), 0, 30000);
         // mainApp.logic.cancelRealTimeBars(mainApp.eClientSocket);
         // mainApp.stop();
     }
