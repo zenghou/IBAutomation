@@ -96,8 +96,8 @@ public class LogicManager implements Logic{
         int contractRequestId = contract.getRequestId();
         eClientSocket.cancelRealTimeBars(contractRequestId);
 
-        // temp print log
-        System.out.println("cancelling request for " + contract.symbol());
+        LOGGER.info("=============================[ Cancelling realTimeBars for ID:  " + requestId + ", Symbol: " +
+                contract.symbol() + " ]=============================");
     }
 
     /**
