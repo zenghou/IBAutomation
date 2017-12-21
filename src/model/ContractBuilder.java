@@ -9,7 +9,7 @@ public class ContractBuilder {
     public static final double MINIMUM_PERCENTAGE_DECREASE = 13.00;
 
     /**
-     * Creates a {@see ContractWithPriceDetail} object with a stock symbol
+     * Creates a {@see ContractWithPriceDetail} object with a stock symbol and its opening price
      * @param ticker
      * @return a ContractWithPriceDetail object
      */
@@ -24,5 +24,22 @@ public class ContractBuilder {
         contract.primaryExch("ISLAND");
 
         return contract;
+    }
+
+    /**
+     * Creates a {@see ContractWithPriceDetail} object from a {@see Contract}
+     * @return a ContractWithPriceDetail object
+     */
+    public static ContractWithPriceDetail buildContractWithPriceDetailFromContract(Contract contract) {
+        ContractWithPriceDetail contractWithPriceDetail = new ContractWithPriceDetail();
+
+        // populate with information from Contract
+        contractWithPriceDetail.symbol(contract.symbol());
+        contractWithPriceDetail.secType(contract.secType());
+        contractWithPriceDetail.currency(contract.currency());
+        contractWithPriceDetail.exchange(contract.exchange());
+        contractWithPriceDetail.primaryExch(contract.primaryExch());
+
+        return contractWithPriceDetail;
     }
 }
