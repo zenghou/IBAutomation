@@ -8,7 +8,7 @@ import model.exceptions.DuplicateContractException;
 import model.exceptions.FullContractListException;
 
 /**
- * Stores a list of unique ContractWithPriceDetails which should be submitted for limit buy order 
+ * Stores a list of unique ContractWithPriceDetails which should be submitted for limit buy order
  */
 public class UniqueOrderContractList extends UniqueContractList {
     private Logic logic = null;

@@ -71,10 +71,15 @@ public class MainApp {
         MainApp.initLogger();
         MainApp mainApp = new MainApp();
         mainApp.init();
+
+        // market selling of active positions from previous day
         mainApp.logic.requestAccountUpdates();
         mainApp.logic.closeAllActivePositionsAtMarketOpen();
+
+        // submitting of valid orders for today's session
         mainApp.logic.getRealTimeBars();
         mainApp.timer.schedule(mainApp.logic.getParser(), 0, 30000);
+
         // mainApp.logic.cancelRealTimeBars(mainApp.eClientSocket);
         // mainApp.stop();
     }
