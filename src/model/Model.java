@@ -30,4 +30,6 @@ public interface Model {
     void addContractWithPriceDetailToOrderList(ContractWithPriceDetail contractWithPriceDetail);
 
     void updateUniqueContractList(ContractWithPriceDetail contract);
+
+    UniqueContractList getUniqueContractToCloseList();
 }

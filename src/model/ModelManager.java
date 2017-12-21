@@ -14,12 +14,16 @@ public class ModelManager implements Model {
     private UniqueContractList uniqueContractList;
     private UniqueOrderContractList uniqueOrderContractList;
 
+    private UniqueContractList uniqueContractToCloseList;
+
     public ModelManager() {
         uniqueContractList = new UniqueContractList();
         tickerPriceHashMap = new HashMap<>();
 
         // uniqueOrderContractList holds at most 15 contracts
         uniqueOrderContractList = new UniqueOrderContractList(15);
+
+        uniqueContractToCloseList = new UniqueContractList();
     }
 
     /**
@@ -40,6 +44,11 @@ public class ModelManager implements Model {
     @Override
     public UniqueContractList getUniqueContractList() {
         return uniqueContractList;
+    }
+
+    @Override
+    public UniqueContractList getUniqueContractToCloseList() {
+        return uniqueContractToCloseList;
     }
 
     @Override
