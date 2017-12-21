@@ -13,7 +13,18 @@ public class ContractWithPriceDetail extends Contract{
     private double percentage;
     private int requestId;
     private double currentPrice;
+    private double position; // number of shares
 
+    public ContractWithPriceDetail() {
+        super();
+
+        this.dayOpeningPrice = DEFAULT_INVALID_VALUE;
+        this.percentage = DEFAULT_INVALID_VALUE;
+
+        requestId = (int) DEFAULT_INVALID_VALUE;
+        currentPrice = DEFAULT_INVALID_VALUE;
+        position = DEFAULT_INVALID_VALUE;
+    }
 
     public ContractWithPriceDetail(double dayOpeningPrice, double percentage) {
         super();
@@ -23,6 +34,7 @@ public class ContractWithPriceDetail extends Contract{
 
         requestId = (int) DEFAULT_INVALID_VALUE;
         currentPrice = DEFAULT_INVALID_VALUE;
+        position = DEFAULT_INVALID_VALUE;
     }
 
     /**
@@ -30,6 +42,14 @@ public class ContractWithPriceDetail extends Contract{
      */
     public void setPercentage(double percentage) {
         this.percentage = percentage;
+    }
+
+    public void setCurrentPrice(double currentPrice) {
+        this.currentPrice = currentPrice;
+    }
+
+    public void setPosition(double position) {
+        this.position = position;
     }
 
     /**
@@ -77,5 +97,9 @@ public class ContractWithPriceDetail extends Contract{
 
     public double getCurrentPrice() {
         return currentPrice;
+    }
+
+    public double getPosition() {
+        return position;
     }
 }
