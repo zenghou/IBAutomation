@@ -12,15 +12,10 @@ public interface Logic extends Observer {
     void getRealTimeBars() throws InterruptedException;
 
     /**
-     * Takes in a {@code stock} whose current price is {@code percentageBelow}  opening price
+     * Takes in a {@code stock} whose current price is {@code percentageBelow} opening price
      * and executes a Limit Buy order of a maximum number of shares with {@code sum} amount of money.
      */
     void placeLimitBuyOrder(ContractWithPriceDetail contract, double percentageBelow, double sum);
-
-    /**
-     * Cancels the all current real time bar subscription
-     */
-    void cancelRealTimeBars();
 
     /**
      * Cancels the real time bar subscription for {@code ContractWithPriceDetail}
@@ -30,4 +25,15 @@ public interface Logic extends Observer {
     /** Returns the Parser object used */
     Parser getParser();
 
+    /**
+     * Request for information about current portfolio. Callback for this method will add active stocks in the portfolio
+     * to Model's {@see uniqueContractToCloseList}
+     */
+    void requestAccountUpdates();
+
+    /**
+     * Loops through Model's {@see uniqueContractToCloseList} and sells each Contract at market price. This method should
+     * be called when the program first executes in order to close previous day's active positions.
+     */
+    void closeAllActivePositionsAtMarketOpen();
 }

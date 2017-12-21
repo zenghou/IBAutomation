@@ -34,6 +34,11 @@ public class LogicManager implements Logic{
         model.getUniqueOrderContractList().setLogic(this);
     }
 
+    @Override
+    public Parser getParser() {
+        return parser;
+    }
+
     /**
      * Loops through model's contract list and retrieves realtimebars for each stock inside
      * eClientSocket to transmit request message from client to TWS server
@@ -60,11 +65,6 @@ public class LogicManager implements Logic{
         }
     }
 
-    @Override
-    public Parser getParser() {
-        return parser;
-    }
-
     /**
      * Similar to {@see getRealTimeBars} except that the data for a specific stock is submitted. This method is used for
      * requesting data of a stock that is newly added to the {@see UniqueContractList}
@@ -82,13 +82,6 @@ public class LogicManager implements Logic{
                 true, null);
 
         requestId++;
-    }
-
-    @Override
-    public void cancelRealTimeBars() {
-        for (int i = 1; i < requestId; i++) {
-            eClientSocket.cancelRealTimeBars(i);
-        }
     }
 
     @Override
@@ -188,5 +181,44 @@ public class LogicManager implements Logic{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void requestAccountUpdates() {
+        eClientSocket.reqAccountUpdates(true, "U9557107");
+    }
+
+    @Override
+    public void closeAllActivePositionsAtMarketOpen() {
+        for (ContractWithPriceDetail contractWithPriceDetail: model.getUniqueContractToCloseList().
+                getContractArrayWithPriceDetailList()) {
+
+            int quantityToBeSold = (int) contractWithPriceDetail.getPosition();
+            double marketPrice = contractWithPriceDetail.getCurrentPrice();
+
+            Order sellOrder = createMarketSellOrder(quantityToBeSold, marketPrice);
+
+            LOGGER.severe("=============================[ Attempting to place order for " + quantityToBeSold + " of " +
+                    contractWithPriceDetail.symbol() + " at market price: " + marketPrice + " ]===========================");
+
+            int currentOrderId = eWrapperImplementation.getCurrentOrderId();
+
+            eClientSocket.placeOrder(currentOrderId, contractWithPriceDetail, sellOrder);
+
+            eWrapperImplementation.incrementOrderId();
+
+            System.out.println("Current id: " + currentOrderId + " next valid is: " + eWrapperImplementation.getCurrentOrderId());
+        }
+    }
+
+    /** Creates a market sell order of {@code quantity} at {@code limitPrice} */
+    private Order createMarketSellOrder(int quantity, double marketPrice) {
+        Order order = new Order();
+        order.action("SELL");
+        order.orderType("MKT");
+        order.totalQuantity(quantity);
+        order.lmtPrice(marketPrice);
+        order.tif("OPG");
+        return order;
     }
 }
