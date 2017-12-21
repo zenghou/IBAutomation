@@ -9,8 +9,12 @@ import java.util.logging.Logger;
 
 import com.ib.client.*;
 
+import model.ContractBuilder;
 import model.ContractWithPriceDetail;
 import model.Model;
+import model.UniqueContractList;
+import model.exceptions.DuplicateContractException;
+import model.exceptions.FullContractListException;
 
 public class EWrapperImplementation implements EWrapper {
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -94,6 +98,80 @@ public class EWrapperImplementation implements EWrapper {
     }
     //@@author
 
+    // ============================= HANDLES CALLBACK FOR eClient#reqAccountUpdates =============================
+
+    /** Delivers the information from IB about the account's value */
+    @Override
+    public void updateAccountValue(String key, String value, String currency,
+                                   String accountName) {
+        System.out.println("UpdateAccountValue. Key: " + key + ", Value: " + value + ", Currency: " + currency +
+                ", AccountName: " + accountName);
+    }
+
+    /**
+     * Delivers the information from IB about a particular contract's portfolio. Adds the Contract to the Model's
+     * {@see uniqueContractToCloseList} by calling {@see EWrapperImplementation#addContractToUniqueContractToCloseList}
+     */
+    @Override
+    public void updatePortfolio(Contract contract, double position,
+                                double marketPrice, double marketValue, double averageCost,
+                                double unrealizedPNL, double realizedPNL, String accountName) {
+
+        LOGGER.info("=============================[ Retrieving portfolio for " +  contract.symbol() +
+                " ]===========================");
+
+        System.out.println("UpdatePortfolio. "+ contract.symbol()+ ", " + contract.secType() + " @ " +
+                contract.exchange() + ": Position: " + position + ", MarketPrice: " + marketPrice + ", MarketValue: " +
+                marketValue + ", AverageCost: " + averageCost + ", UnrealizedPNL: " + unrealizedPNL +
+                ", RealizedPNL: " + realizedPNL + ", AccountName: " + accountName);
+
+        LOGGER.info("=============================[ Attempting to add " +  contract.symbol() + " to Model's" +
+                " uniqueContractToCloseList ]===========================");
+
+        addContractToUniqueContractToCloseList(contract, position, marketPrice);
+    }
+
+    /**
+     * Takes in a {@code Contract}, along with its {@code position} (i.e. number of shares) and it's current
+     * {@code marketPrice} and creates a {@see ContractWithPriceDetail}, which will be added to Model's
+     * {@see uniqueContractToCloseList}.
+     *
+     * This method basically keeps track of the current active orders from the previous
+     * day that should be closed during the current session.
+     */
+    private void addContractToUniqueContractToCloseList(Contract contract, double position, double marketPrice) {
+        UniqueContractList uniqueContractToCloseList = model.getUniqueContractToCloseList();
+
+        ContractWithPriceDetail contractToBeAdded = ContractBuilder.buildContractWithPriceDetailFromContract(contract);
+
+        contractToBeAdded.setPosition(position);
+        contractToBeAdded.setCurrentPrice(marketPrice);
+
+        try {
+            uniqueContractToCloseList.addContract(contractToBeAdded);
+        } catch (FullContractListException e) {
+            e.printStackTrace();
+            System.out.println("Should not add contract " + contract.symbol() + " to a full uniqueContractToCloseList!");
+        } catch (DuplicateContractException e) {
+            e.printStackTrace();
+            System.out.println("Should not add a duplicate contract " + contract.symbol() + " to a" +
+                    " uniqueContractToCloseList!");
+        }
+
+        LOGGER.info("=============================[ " + contract.symbol() + " added to Model's" +
+                " uniqueContractToCloseList ]===========================");
+    }
+
+    @Override
+    public void updateAccountTime(String timeStamp) {
+        System.out.println("UpdateAccountTime. Time: " + timeStamp + "\n");
+    }
+
+    @Override
+    public void accountDownloadEnd(String accountName) {
+        System.out.println("Account download finished: " + accountName + "\n");
+    }
+
     @Override
     public void tickPrice(int tickerId, int field, double price, TickAttr attribs) {
         System.out.println("Tick Price. Ticker Id:"+tickerId+", Field: "+field+", Price: "+price+", CanAutoExecute: "+ attribs.canAutoExecute()
@@ -168,37 +246,6 @@ public class EWrapperImplementation implements EWrapper {
     //! [openorderend]
 
     //! [updateaccountvalue]
-    @Override
-    public void updateAccountValue(String key, String value, String currency,
-                                   String accountName) {
-        System.out.println("UpdateAccountValue. Key: " + key + ", Value: " + value + ", Currency: " + currency + ", AccountName: " + accountName);
-    }
-    //! [updateaccountvalue]
-
-    //! [updateportfolio]
-    @Override
-    public void updatePortfolio(Contract contract, double position,
-                                double marketPrice, double marketValue, double averageCost,
-                                double unrealizedPNL, double realizedPNL, String accountName) {
-        System.out.println("UpdatePortfolio. "+contract.symbol()+", "+contract.secType()+" @ "+contract.exchange()
-                +": Position: "+position+", MarketPrice: "+marketPrice+", MarketValue: "+marketValue+", AverageCost: "+averageCost
-                +", UnrealizedPNL: "+unrealizedPNL+", RealizedPNL: "+realizedPNL+", AccountName: "+accountName);
-    }
-    //! [updateportfolio]
-
-    //! [updateaccounttime]
-    @Override
-    public void updateAccountTime(String timeStamp) {
-        System.out.println("UpdateAccountTime. Time: " + timeStamp+"\n");
-    }
-    //! [updateaccounttime]
-
-    //! [accountdownloadend]
-    @Override
-    public void accountDownloadEnd(String accountName) {
-        System.out.println("Account download finished: "+accountName+"\n");
-    }
-    //! [accountdownloadend]
 
     //! [nextvalidid]
     @Override
