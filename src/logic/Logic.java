@@ -32,6 +32,11 @@ public interface Logic extends Observer {
     void requestAccountUpdates();
 
     /**
+     *  Cancels subscription information about current portfolio.
+     */
+    void cancelAccountUpdates();
+
+    /**
      * Loops through Model's {@see uniqueContractToCloseList} and sells each Contract at market price. This method should
      * be called when the program first executes in order to close previous day's active positions.
      */
