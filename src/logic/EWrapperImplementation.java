@@ -104,8 +104,9 @@ public class EWrapperImplementation implements EWrapper {
     @Override
     public void updateAccountValue(String key, String value, String currency,
                                    String accountName) {
-        System.out.println("UpdateAccountValue. Key: " + key + ", Value: " + value + ", Currency: " + currency +
-                ", AccountName: " + accountName);
+
+//        System.out.println("UpdateAccountValue. Key: " + key + ", Value: " + value + ", Currency: " + currency +
+//                ", AccountName: " + accountName);
     }
 
     /**
