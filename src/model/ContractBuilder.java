@@ -35,10 +35,10 @@ public class ContractBuilder {
 
         // populate with information from Contract
         contractWithPriceDetail.symbol(contract.symbol());
-        contractWithPriceDetail.secType(contract.secType());
-        contractWithPriceDetail.currency(contract.currency());
-        contractWithPriceDetail.exchange(contract.exchange());
-        contractWithPriceDetail.primaryExch(contract.primaryExch());
+        contractWithPriceDetail.secType("STK");
+        contractWithPriceDetail.currency("USD");
+        contractWithPriceDetail.exchange("SMART");
+        contractWithPriceDetail.primaryExch("ISLAND");
 
         return contractWithPriceDetail;
     }
