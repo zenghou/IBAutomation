@@ -39,6 +39,10 @@ public class LogicManager implements Logic{
         return parser;
     }
 
+    // ===================================================================================================
+    // ===================================== HANDLES BUYING ASPECT =======================================
+    // ===================================================================================================
+
     /**
      * Loops through model's contract list and retrieves realtimebars for each stock inside
      * eClientSocket to transmit request message from client to TWS server
@@ -173,19 +177,15 @@ public class LogicManager implements Logic{
         return (int) Math.floor(sum/purchasePrice);
     }
 
-    @Override
-    public void update(Observable o, Object arg) {
-        ContractWithPriceDetail contract = (ContractWithPriceDetail) arg;
-        try {
-            getRealTimeBarsForContract(contract);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+    // =======================================================================================
+    // ============================= HANDLES SELLING ASPECT ==================================
+    // =======================================================================================
 
     @Override
     public void requestAccountUpdates() {
         eClientSocket.reqAccountUpdates(true, "U9557107");
+
+        LOGGER.info("=============================[ Requesting for Account Updates ]===========================");
     }
 
     @Override
@@ -220,5 +220,19 @@ public class LogicManager implements Logic{
         order.lmtPrice(marketPrice);
         order.tif("OPG");
         return order;
+    }
+
+    // ===================================================================================================
+    // ============= HANDLES UPDATING WHEN NEW CONTRACT IS ADDED TO UNIQUE CONTRACT LIST =================
+    // ===================================================================================================
+
+    @Override
+    public void update(Observable o, Object arg) {
+        ContractWithPriceDetail contract = (ContractWithPriceDetail) arg;
+        try {
+            getRealTimeBarsForContract(contract);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
