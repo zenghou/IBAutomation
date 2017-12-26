@@ -12,8 +12,9 @@ public class ContractWithPriceDetail extends Contract{
     private double dayOpeningPrice;
     private double percentage;
     private int requestId;
-    private double currentPrice;
+    private double currentPrice; // current market price of the stock
     private double position; // number of shares
+    private double averageCost;
 
     public ContractWithPriceDetail() {
         super();
@@ -24,6 +25,7 @@ public class ContractWithPriceDetail extends Contract{
         requestId = (int) DEFAULT_INVALID_VALUE;
         currentPrice = DEFAULT_INVALID_VALUE;
         position = DEFAULT_INVALID_VALUE;
+        averageCost = DEFAULT_INVALID_VALUE;
     }
 
     public ContractWithPriceDetail(double dayOpeningPrice, double percentage) {
@@ -35,6 +37,7 @@ public class ContractWithPriceDetail extends Contract{
         requestId = (int) DEFAULT_INVALID_VALUE;
         currentPrice = DEFAULT_INVALID_VALUE;
         position = DEFAULT_INVALID_VALUE;
+        averageCost = DEFAULT_INVALID_VALUE;
     }
 
     /**
@@ -44,12 +47,34 @@ public class ContractWithPriceDetail extends Contract{
         this.percentage = percentage;
     }
 
-    public void setCurrentPrice(double currentPrice) {
-        this.currentPrice = currentPrice;
+    public void setCurrentPrice(double currentPrice) throws Exception {
+        if (currentPrice == DEFAULT_INVALID_VALUE) {
+            this.currentPrice = currentPrice;
+        } else {
+            throw new Exception("Current price for " + symbol() + " can only be set once!");
+        }
     }
 
-    public void setPosition(double position) {
-        this.position = position;
+    /**
+     * Sets the number of shares purchased for this contract. Only able to set the number of shares once.
+     */
+    public void setPosition(double position) throws Exception {
+        if (position == DEFAULT_INVALID_VALUE) {
+            this.position = position;
+        } else {
+            throw new Exception("Position for " + symbol() + " can only be set once!");
+        }
+    }
+
+    /**
+     * Sets the average cost for this contract. Only able to set the average cost once.
+     */
+    public void setAverageCost(double averageCost) throws Exception {
+        if (averageCost == DEFAULT_INVALID_VALUE) {
+            this.averageCost = averageCost;
+        } else {
+            throw new Exception("Average cost of " + symbol() + " can only be set once!");
+        }
     }
 
     /**
@@ -101,5 +126,9 @@ public class ContractWithPriceDetail extends Contract{
 
     public double getPosition() {
         return position;
+    }
+
+    public double getAverageCost() {
+        return averageCost;
     }
 }
