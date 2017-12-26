@@ -105,8 +105,8 @@ public class EWrapperImplementation implements EWrapper {
     public void updateAccountValue(String key, String value, String currency,
                                    String accountName) {
 
-//        System.out.println("UpdateAccountValue. Key: " + key + ", Value: " + value + ", Currency: " + currency +
-//                ", AccountName: " + accountName);
+        System.out.println("UpdateAccountValue. Key: " + key + ", Value: " + value + ", Currency: " + currency +
+                ", AccountName: " + accountName);
     }
 
     /**
@@ -129,7 +129,11 @@ public class EWrapperImplementation implements EWrapper {
         LOGGER.info("=============================[ Attempting to add " +  contract.symbol() + " to Model's" +
                 " uniqueContractToCloseList ]===========================");
 
-        addContractToUniqueContractToCloseList(contract, position, marketPrice);
+        try {
+            addContractToUniqueContractToCloseList(contract, position, marketPrice, averageCost);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -140,13 +144,15 @@ public class EWrapperImplementation implements EWrapper {
      * This method basically keeps track of the current active orders from the previous
      * day that should be closed during the current session.
      */
-    private void addContractToUniqueContractToCloseList(Contract contract, double position, double marketPrice) {
+    private void addContractToUniqueContractToCloseList(Contract contract, double position, double marketPrice,
+                                                        double averageCost) throws Exception {
         UniqueContractList uniqueContractToCloseList = model.getUniqueContractToCloseList();
 
         ContractWithPriceDetail contractToBeAdded = ContractBuilder.buildContractWithPriceDetailFromContract(contract);
 
         contractToBeAdded.setPosition(position);
         contractToBeAdded.setCurrentPrice(marketPrice);
+        contractToBeAdded.setAverageCost(averageCost);
 
         try {
             uniqueContractToCloseList.addContract(contractToBeAdded);
@@ -158,6 +164,8 @@ public class EWrapperImplementation implements EWrapper {
             System.out.println("Should not add a duplicate contract " + contract.symbol() + " to a" +
                     " uniqueContractToCloseList!");
         }
+
+        // no error; successfully added to model
 
         LOGGER.info("=============================[ " + contract.symbol() + " added to Model's" +
                 " uniqueContractToCloseList ]===========================");
