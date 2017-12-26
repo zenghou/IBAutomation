@@ -74,7 +74,10 @@ public class MainApp {
 
         // market selling of active positions from previous day
         mainApp.logic.requestAccountUpdates();
-        mainApp.logic.closeAllActivePositionsAtMarketOpen();
+
+        Thread.sleep(3000);
+
+        // mainApp.logic.closeAllActivePositionsAtMarketOpen();
 
         // submitting of valid orders for today's session
         mainApp.logic.getRealTimeBars();
