@@ -189,21 +189,32 @@ public class LogicManager implements Logic{
     }
 
     @Override
+    public void cancelAccountUpdates() {
+        eClientSocket.reqAccountUpdates(false, "U9557107");
+
+        LOGGER.info("=============================[ Cancelling subscription for Account Updates ]=================" +
+                "==========");
+    }
+
+    @Override
     public void closeAllActivePositionsAtMarketOpen() {
         for (ContractWithPriceDetail contractWithPriceDetail: model.getUniqueContractToCloseList().
                 getContractArrayWithPriceDetailList()) {
 
-            int quantityToBeSold = (int) contractWithPriceDetail.getPosition();
-            double marketPrice = contractWithPriceDetail.getCurrentPrice();
+            double percentageAboveOrderPrice = 5.00;
 
-            Order sellOrder = createMarketSellOrder(quantityToBeSold, marketPrice);
+            int quantityToBeSold = (int) contractWithPriceDetail.getPosition();
+            double priceToBeSoldAt = getPriceAboveOrderPriceBySomePercent(percentageAboveOrderPrice, contractWithPriceDetail);
+
+            Order limitSellOrder = createLimitSellOrder(quantityToBeSold, priceToBeSoldAt);
 
             LOGGER.severe("=============================[ Attempting to place order for " + quantityToBeSold + " of " +
-                    contractWithPriceDetail.symbol() + " at market price: " + marketPrice + " ]===========================");
+                    contractWithPriceDetail.symbol() + " at " + percentageAboveOrderPrice + "% above order price" +
+                    priceToBeSoldAt + " ]===========================");
 
             int currentOrderId = eWrapperImplementation.getCurrentOrderId();
 
-            eClientSocket.placeOrder(currentOrderId, contractWithPriceDetail, sellOrder);
+            eClientSocket.placeOrder(currentOrderId, contractWithPriceDetail, limitSellOrder);
 
             eWrapperImplementation.incrementOrderId();
 
@@ -212,14 +223,21 @@ public class LogicManager implements Logic{
     }
 
     /** Creates a market sell order of {@code quantity} at {@code limitPrice} */
-    private Order createMarketSellOrder(int quantity, double marketPrice) {
+    private Order createLimitSellOrder(int quantity, double limitPrice) {
         Order order = new Order();
         order.action("SELL");
-        order.orderType("MKT");
+        order.orderType("LMT");
         order.totalQuantity(quantity);
-        order.lmtPrice(marketPrice);
+        order.lmtPrice(limitPrice);
         order.tif("OPG");
         return order;
+    }
+
+    /** Gets the a price that is {@code percentage} above the order price for a {@code contractWithPriceDetail} */
+    private double getPriceAboveOrderPriceBySomePercent (double percentage, ContractWithPriceDetail contractWithPriceDetail) {
+        double percentageAboveAveragePrice = contractWithPriceDetail.getAverageCost() * ((100 + percentage)/100);
+
+        return formatOrderPrice(percentageAboveAveragePrice);
     }
 
     // ===================================================================================================
