@@ -72,15 +72,17 @@ public class MainApp {
         MainApp mainApp = new MainApp();
         mainApp.init();
 
-        // market selling of active positions from previous day
+        // retrieving a list of symbols from previous trading day
         mainApp.logic.requestAccountUpdates();
-
         Thread.sleep(3000);
+        mainApp.logic.cancelAccountUpdates();
 
-        // mainApp.logic.closeAllActivePositionsAtMarketOpen();
+        mainApp.logic.closeAllActivePositionsAtMarketOpen();
 
         // submitting of valid orders for today's session
         mainApp.logic.getRealTimeBars();
+
+        // read CSV file every 30 seconds
         mainApp.timer.schedule(mainApp.logic.getParser(), 0, 30000);
 
         // mainApp.logic.cancelRealTimeBars(mainApp.eClientSocket);
