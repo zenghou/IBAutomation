@@ -48,7 +48,7 @@ public class ContractWithPriceDetail extends Contract{
     }
 
     public void setCurrentPrice(double currentPrice) throws Exception {
-        if (currentPrice == DEFAULT_INVALID_VALUE) {
+        if (this.currentPrice == DEFAULT_INVALID_VALUE) {
             this.currentPrice = currentPrice;
         } else {
             throw new Exception("Current price for " + symbol() + " can only be set once!");
@@ -59,9 +59,10 @@ public class ContractWithPriceDetail extends Contract{
      * Sets the number of shares purchased for this contract. Only able to set the number of shares once.
      */
     public void setPosition(double position) throws Exception {
-        if (position == DEFAULT_INVALID_VALUE) {
+        if (this.position == DEFAULT_INVALID_VALUE) {
             this.position = position;
         } else {
+            System.out.println("Number of shares for " + symbol() + "is " + position);
             throw new Exception("Position for " + symbol() + " can only be set once!");
         }
     }
@@ -70,7 +71,7 @@ public class ContractWithPriceDetail extends Contract{
      * Sets the average cost for this contract. Only able to set the average cost once.
      */
     public void setAverageCost(double averageCost) throws Exception {
-        if (averageCost == DEFAULT_INVALID_VALUE) {
+        if (this.averageCost == DEFAULT_INVALID_VALUE) {
             this.averageCost = averageCost;
         } else {
             throw new Exception("Average cost of " + symbol() + " can only be set once!");
