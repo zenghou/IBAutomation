@@ -68,7 +68,7 @@ public class Parser extends TimerTask {
 
             HashMap<String, Double> tickerPriceHashMap = model.getTickerPriceHashMap();
 
-            // only add to tickerPriceHashMap if ticker is inside
+            // only add to tickerPriceHashMap if ticker is not already inside
             if (!tickerPriceHashMap.containsKey(ticker)) {
                 tickerPriceHashMap.put(ticker, price);
 
