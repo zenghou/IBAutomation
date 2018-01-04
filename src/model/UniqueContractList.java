@@ -3,6 +3,8 @@ package model;
 
 import java.util.ArrayList;
 import java.util.Observable;
+import java.util.logging.Logger;
+
 
 import model.exceptions.DuplicateContractException;
 import model.exceptions.FullContractListException;
@@ -11,6 +13,8 @@ import model.exceptions.FullContractListException;
  * Stores a list of unique ContractWithPriceDetail which are to be monitored with live stream of price data
  */
 public class UniqueContractList extends Observable {
+    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
     private final int DEFAULT_ARRAY_SIZE = 1000;
     // default array size will be 1000
     private int arraySize = DEFAULT_ARRAY_SIZE;
@@ -54,5 +58,17 @@ public class UniqueContractList extends Observable {
 
     public ArrayList<ContractWithPriceDetail> getContractArrayWithPriceDetailList() {
         return contractWithPriceDetailArrayList;
+    }
+
+    public void printAllSymbolsInList() {
+
+        LOGGER.info("=============================[ Retrieving all the symbols in this list: ");
+
+        int numberOfSymbols = 1;
+
+        for (ContractWithPriceDetail contract : contractWithPriceDetailArrayList) {
+            LOGGER.info(numberOfSymbols + ": " + contract.symbol() + ", position: " + contract.getPosition());
+            numberOfSymbols++;
+        }
     }
 }
