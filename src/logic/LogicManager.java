@@ -5,6 +5,7 @@ import java.text.DecimalFormat;
 import java.util.Observable;
 import java.util.logging.Logger;
 
+import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 import com.ib.client.Order;
 
@@ -19,7 +20,11 @@ public class LogicManager implements Logic{
     private EWrapperImplementation eWrapperImplementation;
     private Parser parser;
 
+    private ScheduledCancelUnfilledOrders cancelUnfilledOrdersTask;
+    private ScheduledMarketOnClose marketOnCloseTask;
+
     private int requestId = 1;
+    private int numberOfSellLimitOrdersSubmitted = 0;
 
     public LogicManager(Model modelManager, EClientSocket eClientSocket, EWrapperImplementation eWrapperImplementation) {
         this.model = modelManager;
@@ -32,6 +37,9 @@ public class LogicManager implements Logic{
         // called after listOfSymbol is populated by parser#readDataUpdateModel()
         model.initializeModel();
         model.getUniqueOrderContractList().setLogic(this);
+
+        cancelUnfilledOrdersTask = new ScheduledCancelUnfilledOrders(this, model);
+        marketOnCloseTask = new ScheduledMarketOnClose(this, model);
     }
 
     @Override
@@ -45,7 +53,9 @@ public class LogicManager implements Logic{
 
     /**
      * Loops through model's contract list and retrieves realtimebars for each stock inside
-     * eClientSocket to transmit request message from client to TWS server
+     * eClientSocket to transmit request message from client to TWS se
+     *
+     * rver
      * @throws InterruptedException
      */
     @Override
@@ -86,6 +96,16 @@ public class LogicManager implements Logic{
                 true, null);
 
         requestId++;
+    }
+
+    @Override
+    public int getCurrentOrderId() {
+        return eWrapperImplementation.getCurrentOrderId();
+    }
+
+    @Override
+    public void incrementOrderId() {
+        eWrapperImplementation.incrementOrderId();
     }
 
     @Override
@@ -197,29 +217,38 @@ public class LogicManager implements Logic{
     }
 
     @Override
-    public void closeAllActivePositionsAtMarketOpen() {
+    public void setLimitSellOrdersForAllExistingPositions(double percentageAboveOrderPrice) {
         for (ContractWithPriceDetail contractWithPriceDetail: model.getUniqueContractToCloseList().
                 getContractArrayWithPriceDetailList()) {
-
-            double percentageAboveOrderPrice = 5.00;
 
             int quantityToBeSold = (int) contractWithPriceDetail.getPosition();
             double priceToBeSoldAt = getPriceAboveOrderPriceBySomePercent(percentageAboveOrderPrice, contractWithPriceDetail);
 
             Order limitSellOrder = createLimitSellOrder(quantityToBeSold, priceToBeSoldAt);
 
-            LOGGER.severe("=============================[ Attempting to place order for " + quantityToBeSold + " of " +
-                    contractWithPriceDetail.symbol() + " at " + percentageAboveOrderPrice + "% above order price" +
-                    priceToBeSoldAt + " ]===========================");
+            LOGGER.severe("***************************[ Attempting to place sell order for " + quantityToBeSold + " of " +
+                    contractWithPriceDetail.symbol() + " at " + percentageAboveOrderPrice + "% above order price at: " +
+                    priceToBeSoldAt + " ]***************************");
 
             int currentOrderId = eWrapperImplementation.getCurrentOrderId();
 
             eClientSocket.placeOrder(currentOrderId, contractWithPriceDetail, limitSellOrder);
 
+            LOGGER.info("=============================[ Attempting to add orderId: " + currentOrderId + " to Model" +
+                    " ]=============================");
+
+            model.addSellLimitOrderId(currentOrderId);
+
             eWrapperImplementation.incrementOrderId();
 
             System.out.println("Current id: " + currentOrderId + " next valid is: " + eWrapperImplementation.getCurrentOrderId());
+
+            // increment count for positions closed
+            numberOfSellLimitOrdersSubmitted++;
         }
+
+        LOGGER.severe("=============================[ Attempted to submit " + numberOfSellLimitOrdersSubmitted +
+                "sell limit position(s) ]=============================" );
     }
 
     /** Creates a market sell order of {@code quantity} at {@code limitPrice} */
@@ -238,6 +267,29 @@ public class LogicManager implements Logic{
         double percentageAboveAveragePrice = contractWithPriceDetail.getAverageCost() * ((100 + percentage)/100);
 
         return formatOrderPrice(percentageAboveAveragePrice);
+    }
+
+    @Override
+    public void cancelOrder(int orderId) {
+        LOGGER.info("=============================[ Submitting cancellation for Sell Limit order id: " + orderId +
+                " ]=============================");
+
+        eClientSocket.cancelOrder(orderId);
+    }
+
+    @Override
+    public void placeOrder(int currentOrderId, Contract contract, Order order) {
+        eClientSocket.placeOrder(currentOrderId, contract, order);
+    }
+
+    @Override
+    public ScheduledMarketOnClose getScheduledMarketOnCloseTask() {
+        return marketOnCloseTask;
+    }
+
+    @Override
+    public ScheduledCancelUnfilledOrders getScheduledCancelUnfilledOrdersTask() {
+        return cancelUnfilledOrdersTask;
     }
 
     // ===================================================================================================

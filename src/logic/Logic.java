@@ -3,6 +3,9 @@ package logic;
 
 import java.util.Observer;
 
+import com.ib.client.Contract;
+import com.ib.client.Order;
+
 import model.ContractWithPriceDetail;
 
 public interface Logic extends Observer {
@@ -37,8 +40,24 @@ public interface Logic extends Observer {
     void cancelAccountUpdates();
 
     /**
-     * Loops through Model's {@see uniqueContractToCloseList} and sells each Contract at market price. This method should
-     * be called when the program first executes in order to close previous day's active positions.
+     * Loops through Model's {@see uniqueContractToCloseList} and creates a limit sell order for each Contract at
+     * {@code percentageAboveOrderPrice } above market price. This method should be called when the program first
+     * executes in order to close previous day's active positions.
      */
-    void closeAllActivePositionsAtMarketOpen();
+    void setLimitSellOrdersForAllExistingPositions(double percentageAboveOrderPrice);
+
+    /**
+     * Takes in {@param orderId} of an open order and cancels it.
+     */
+    void cancelOrder(int orderId);
+
+    int getCurrentOrderId();
+
+    void incrementOrderId();
+
+    void placeOrder(int currentOrderId, Contract contract, Order order);
+
+    ScheduledMarketOnClose getScheduledMarketOnCloseTask();
+
+    ScheduledCancelUnfilledOrders getScheduledCancelUnfilledOrdersTask();
 }
