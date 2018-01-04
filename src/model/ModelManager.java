@@ -15,6 +15,7 @@ public class ModelManager implements Model {
     private UniqueOrderContractList uniqueOrderContractList;
 
     private UniqueContractList uniqueContractToCloseList;
+    private SellLimitOrderDetailList sellLimitOrderDetailsList;
 
     public ModelManager() {
         uniqueContractList = new UniqueContractList();
@@ -24,6 +25,8 @@ public class ModelManager implements Model {
         uniqueOrderContractList = new UniqueOrderContractList(15);
 
         uniqueContractToCloseList = new UniqueContractList();
+
+        sellLimitOrderDetailsList = new SellLimitOrderDetailList();
     }
 
     /**
@@ -127,5 +130,45 @@ public class ModelManager implements Model {
     @Override
     public UniqueOrderContractList getUniqueOrderContractList() {
         return uniqueOrderContractList;
+    }
+
+    @Override
+    public void updateSellLimitOrderDetailList(SellLimitOrderDetail sellLimitOrderDetail) {
+        sellLimitOrderDetailsList.updateListWith(sellLimitOrderDetail);
+    }
+
+    @Override
+    public boolean isSellLimitOrderId(int orderId) {
+        return sellLimitOrderDetailsList.isSellOrderId(orderId);
+    }
+
+    @Override
+    public void addSellLimitOrderId(int orderId) {
+        sellLimitOrderDetailsList.addSellOrderId(orderId);
+    }
+
+    @Override
+    public void removeSellLimitOrderId(int orderId) throws Exception {
+        sellLimitOrderDetailsList.removeSellLimitOrderId(orderId);
+    }
+
+    @Override
+    public ArrayList<Integer> getOrderIdsForUnfilledSellLimitOrders() {
+        return sellLimitOrderDetailsList.getOrderIdsForUnfilledSellLimitOrders();
+    }
+
+    @Override
+    public HashMap<String, Double> getSymbolAndPositionsForUnfilledSellLimitOrders() {
+        return sellLimitOrderDetailsList.getSymbolsAndRemainingPositionsForUnfilledSellLimitOrders();
+    }
+
+    @Override
+    public void printAllStocksInUniqueContractToCloseList() {
+        uniqueContractToCloseList.printAllSymbolsInList();
+    }
+
+    @Override
+    public SellLimitOrderDetail retrieveSellLimitOrderDetailById(int orderId) {
+        return sellLimitOrderDetailsList.retrieveSellLimitOrderDetailById(orderId);
     }
 }

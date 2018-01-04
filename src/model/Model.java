@@ -32,4 +32,26 @@ public interface Model {
     void updateUniqueContractList(ContractWithPriceDetail contract);
 
     UniqueContractList getUniqueContractToCloseList();
+
+    void updateSellLimitOrderDetailList(SellLimitOrderDetail sellLimitOrderDetail);
+
+    /** Checks if an orderId is a sell order */
+    boolean isSellLimitOrderId(int orderId);
+
+    /** Keeps track of the order Ids that are sell orders */
+    void addSellLimitOrderId(int orderId);
+
+    /** Removes sell limit order ids after they are cancelled */
+    void removeSellLimitOrderId(int orderId) throws Exception;
+
+    /** Returns a list of orderIds whose orders are not filled such that they can be cancelled */
+    ArrayList<Integer> getOrderIdsForUnfilledSellLimitOrders();
+
+    /** Returns a HashMap of symbol and positions to be closed by MOC */
+    HashMap<String, Double> getSymbolAndPositionsForUnfilledSellLimitOrders();
+
+    /** Prints out a list of stocks in UniqueContractToCloselist to make sure the correct stocks are inside */
+    void printAllStocksInUniqueContractToCloseList();
+
+    SellLimitOrderDetail retrieveSellLimitOrderDetailById(int orderId);
 }
