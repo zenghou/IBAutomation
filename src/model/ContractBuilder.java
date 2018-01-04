@@ -42,4 +42,16 @@ public class ContractBuilder {
 
         return contractWithPriceDetail;
     }
+
+    public static Contract buildContractWithSymbol(String symbol) {
+        Contract contract = new Contract();
+
+        contract.symbol(symbol);
+        contract.secType("STK");
+        contract.currency("USD");
+        contract.exchange("SMART");
+        contract.primaryExch("ISLAND");
+
+        return contract;
+    }
 }
