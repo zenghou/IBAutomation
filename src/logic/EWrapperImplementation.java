@@ -12,6 +12,7 @@ import com.ib.client.*;
 import model.ContractBuilder;
 import model.ContractWithPriceDetail;
 import model.Model;
+import model.SellLimitOrderDetail;
 import model.UniqueContractList;
 import model.exceptions.DuplicateContractException;
 import model.exceptions.FullContractListException;
@@ -56,6 +57,10 @@ public class EWrapperImplementation implements EWrapper {
         currentOrderId++;
     }
 
+    /* ========================================================================================================== */
+    /* ============================= HANDLES CALLBACK FOR eClient#reqRealTimeBars =============================== */
+    /* ========================================================================================================== */
+
     /**
      * Handles the call back from reqRealTimeBar.
      * Sets the opening price, if none, of a {@code ContractWithPriceDetail}
@@ -66,12 +71,6 @@ public class EWrapperImplementation implements EWrapper {
                             double low, double close, long volume, double wap, int count) {
         // retrieve contract by reqId
         ContractWithPriceDetail contract = model.retrieveContractWithPriceDetailByReqId(reqId);
-
-//        LOGGER.info("=============================[ Handling realTimeBars callback for " +  contract.symbol() +
-//                " ]===========================");
-
-//        System.out.println("[EWrapperImpl] RealTimeBars. " + reqId + " - Time: " + time + ", Open: " + open
-//                + ", High: " + high + ", Low: " + low + ", Close: " + close);
 
         if (isReadyForOrderSubmissionAtCurrentPrice(contract, open)) {
             LOGGER.info("=============================[ " +  contract.symbol() +
@@ -91,22 +90,20 @@ public class EWrapperImplementation implements EWrapper {
      * @return true if ContractWithPriceDetail can be submitted for purchase
      */
     private boolean isReadyForOrderSubmissionAtCurrentPrice(ContractWithPriceDetail contract, double currentPrice) {
-//        LOGGER.info("=============================[ Checking if " + contract.symbol() +
-//                " is ready for order submission ]=============================");
-
         return contract.hasFallenBelowPercentage(currentPrice);
     }
     //@@author
 
-    // ============================= HANDLES CALLBACK FOR eClient#reqAccountUpdates =============================
+    /* ========================================================================================================== */
+    /* ============================= HANDLES CALLBACK FOR eClient#reqAccountUpdates ============================= */
+    /* ========================================================================================================== */
 
     /** Delivers the information from IB about the account's value */
     @Override
     public void updateAccountValue(String key, String value, String currency,
                                    String accountName) {
-
-        System.out.println("UpdateAccountValue. Key: " + key + ", Value: " + value + ", Currency: " + currency +
-                ", AccountName: " + accountName);
+//        System.out.println("UpdateAccountValue. Key: " + key + ", Value: " + value + ", Currency: " + currency +
+//                ", AccountName: " + accountName);
     }
 
     /**
@@ -121,7 +118,7 @@ public class EWrapperImplementation implements EWrapper {
         LOGGER.info("=============================[ Retrieving portfolio for " +  contract.symbol() +
                 " ]===========================");
 
-        System.out.println("UpdatePortfolio. "+ contract.symbol()+ ", " + contract.secType() + " @ " +
+        System.out.println("Current Portfolio: "+ contract.symbol()+ ", " + contract.secType() + " @ " +
                 contract.exchange() + ": Position: " + position + ", MarketPrice: " + marketPrice + ", MarketValue: " +
                 marketValue + ", AverageCost: " + averageCost + ", UnrealizedPNL: " + unrealizedPNL +
                 ", RealizedPNL: " + realizedPNL + ", AccountName: " + accountName);
@@ -169,6 +166,68 @@ public class EWrapperImplementation implements EWrapper {
 
         LOGGER.info("=============================[ " + contract.symbol() + " added to Model's" +
                 " uniqueContractToCloseList ]===========================");
+    }
+
+    /* ========================================================================================================== */
+    /* ============================= HANDLES CALLBACK FOR eClient#placeOrder ==================================== */
+    /* ========================================================================================================== */
+
+    @Override
+    public void orderStatus(int orderId, String status, double filled,
+                            double remaining, double avgFillPrice, int permId, int parentId,
+                            double lastFillPrice, int clientId, String whyHeld, double mktCapPrice) {
+
+        System.out.println("OrderStatus. Id: "+orderId+", Status: "+status+", Filled"+filled+", Remaining: "+remaining
+                +", AvgFillPrice: "+avgFillPrice+", PermId: "+permId+", ParentId: "+parentId+", LastFillPrice: "+lastFillPrice+
+                ", ClientId: "+clientId+", WhyHeld: "+whyHeld+", MktCapPrice: "+mktCapPrice);
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ [ ERROR! THREAD DID NOT SLEEP BEFORE TRYING TO UPDATE SELL LIMIT " +
+                    "ORDER DETAIL LIST!! ] @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        }
+
+        if (model.isSellLimitOrderId(orderId)) {
+            LOGGER.info("=============================[ Attempting to update SellLimitOrderDetailList for " +
+                    orderId + "]===========================");
+
+            SellLimitOrderDetail sellLimitOrderDetail = new SellLimitOrderDetail(orderId, filled, remaining);
+            model.updateSellLimitOrderDetailList(sellLimitOrderDetail);
+        }
+    }
+
+    @Override
+    public void openOrder(int orderId, Contract contract, Order order,
+                          OrderState orderState) {
+
+        System.out.println("OpenOrder. ID: "+orderId+", "+contract.symbol()+", "+contract.secType()+" @ "+contract.exchange()+": "+
+                order.action()+", "+order.orderType()+" "+order.totalQuantity()+", "+orderState.status());
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ [ ERROR! THREAD DID NOT SLEEP BEFORE TRYING TO UPDATE SELL LIMIT " +
+                    "ORDER DETAIL LIST!! ] @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        }
+
+        if (model.isSellLimitOrderId(orderId)) {
+            SellLimitOrderDetail sellLimitOrderDetail = model.retrieveSellLimitOrderDetailById(orderId);
+
+            try {
+                LOGGER.info("***************************[ SellLimitOrderDetail: Attempting to add symbol " +
+                        contract.symbol() + " to order id: " + orderId + "]******************************");
+
+                sellLimitOrderDetail.setSymbol(contract.symbol());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void openOrderEnd() {
+        System.out.println("OpenOrderEnd");
     }
 
     @Override
@@ -227,34 +286,6 @@ public class EWrapperImplementation implements EWrapper {
                 formattedBasisPoints+", ImpliedFuture: "+impliedFuture+", HoldDays: "+holdDays+", FutureLastTradeDate: "+futureLastTradeDate+
                 ", DividendImpact: "+dividendImpact+", DividendsToLastTradeDate: "+dividendsToLastTradeDate);
     }
-    //! [orderstatus]
-    @Override
-    public void orderStatus(int orderId, String status, double filled,
-                            double remaining, double avgFillPrice, int permId, int parentId,
-                            double lastFillPrice, int clientId, String whyHeld, double mktCapPrice) {
-        System.out.println("OrderStatus. Id: "+orderId+", Status: "+status+", Filled"+filled+", Remaining: "+remaining
-                +", AvgFillPrice: "+avgFillPrice+", PermId: "+permId+", ParentId: "+parentId+", LastFillPrice: "+lastFillPrice+
-                ", ClientId: "+clientId+", WhyHeld: "+whyHeld+", MktCapPrice: "+mktCapPrice);
-    }
-    //! [orderstatus]
-
-    //! [openorder]
-    @Override
-    public void openOrder(int orderId, Contract contract, Order order,
-                          OrderState orderState) {
-        System.out.println("OpenOrder. ID: "+orderId+", "+contract.symbol()+", "+contract.secType()+" @ "+contract.exchange()+": "+
-                order.action()+", "+order.orderType()+" "+order.totalQuantity()+", "+orderState.status());
-    }
-    //! [openorder]
-
-    //! [openorderend]
-    @Override
-    public void openOrderEnd() {
-        System.out.println("OpenOrderEnd");
-    }
-    //! [openorderend]
-
-    //! [updateaccountvalue]
 
     //! [nextvalidid]
     @Override
