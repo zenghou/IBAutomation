@@ -1,4 +1,6 @@
 //@@author zenghou
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.Timer;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
@@ -11,6 +13,7 @@ import com.ib.client.EClientSocket;
 import com.ib.client.EReader;
 import com.ib.client.EReaderSignal;
 
+import logic.DateBuilder;
 import logic.EWrapperImplementation;
 import logic.Logic;
 import logic.LogicManager;
@@ -29,7 +32,10 @@ public class MainApp {
     protected Logic logic;
     protected Model model;
 
-    public void init() throws Exception {
+    /**
+     * Initialize the parts required for all the processes.
+     */
+    private void init() throws Exception {
         LOGGER.log(Level.INFO, "=============================[ Initializing IB Automatic Trading ]===========================");
 
         model = new ModelManager();
@@ -67,35 +73,48 @@ public class MainApp {
         Thread.sleep(1000);
     }
 
-    public static void main(String[] args) throws Exception {
-        MainApp.initLogger();
-        MainApp mainApp = new MainApp();
-        mainApp.init();
-
+    /**
+     * Starts the sell limit order process.
+     */
+    private void initiateSellLimitOrders() throws Exception {
+        LOGGER.log(Level.INFO, "=============================[ Initiate Sell Limit Orders ]===========================");
         // retrieving a list of symbols from previous trading day
-        mainApp.logic.requestAccountUpdates();
-        Thread.sleep(3000);
-        mainApp.logic.cancelAccountUpdates();
+        logic.requestAccountUpdates();
 
-        mainApp.logic.closeAllActivePositionsAtMarketOpen();
+        // pause thread for 1.5 seconds to allow updates to be completed
+        Thread.sleep(1500);
 
-        // submitting of valid orders for today's session
-        mainApp.logic.getRealTimeBars();
+        // Terminate subscription of account updates
+        logic.cancelAccountUpdates();
 
-        // read CSV file every 30 seconds
-        mainApp.timer.schedule(mainApp.logic.getParser(), 0, 30000);
+        // To log the correct stocks that are to be closed
+        model.printAllStocksInUniqueContractToCloseList();
 
-        // mainApp.logic.cancelRealTimeBars(mainApp.eClientSocket);
-        // mainApp.stop();
+        // submit sell limit orders to IB
+        logic.setLimitSellOrdersForAllExistingPositions(5);
     }
 
     /**
-     * Disconnects the client app
+     * Initiates the scheduled tasks of cancelling unfilled limit sell orders and executing MOC orders for the respective
+     * stocks at a fixed time {@see DateBuilder}.
      */
-    public void stop() {
-        LOGGER.log(Level.INFO, "=============================[ Terminating Session ]===========================");
+    private void initiateScheduledCancellationAndMarketClose() {
+        LOGGER.log(Level.INFO, "=============================[ Initiate Scheduled Tasks ]===========================");
 
-        eClientSocket.eDisconnect();
+        timer.schedule(logic.getScheduledCancelUnfilledOrdersTask(), DateBuilder.getCancellationTime());
+        timer.schedule(logic.getScheduledMarketOnCloseTask(), DateBuilder.getMarketOnCloseTime());
+    }
+
+    /**
+     * Starts the buying process
+     */
+    private void initiateBuying() throws Exception {
+        LOGGER.log(Level.INFO, "=============================[ Initiate Buying Process ]===========================");
+        // submitting of valid orders for today's session
+        logic.getRealTimeBars();
+
+        // read CSV file every 30 seconds
+        timer.schedule(logic.getParser(), 0, 30000);
     }
 
     /**
@@ -113,5 +132,30 @@ public class MainApp {
         fileHandler.setFormatter(new SimpleFormatter());
         fileHandler.setLevel(Level.INFO);
         LOGGER.addHandler(fileHandler);
+    }
+
+    /**
+     * Disconnects the client app
+     */
+    public void stop() {
+        LOGGER.log(Level.INFO, "=============================[ Terminating Session ]===========================");
+
+        eClientSocket.eDisconnect();
+    }
+
+    /**
+     * Main entry point
+     */
+    public static void main(String[] args) throws Exception {
+        MainApp.initLogger();
+
+        MainApp mainApp = new MainApp();
+        mainApp.init();
+
+        mainApp.initiateSellLimitOrders();
+
+        mainApp.initiateScheduledCancellationAndMarketClose();
+
+        mainApp.initiateBuying();
     }
 }
