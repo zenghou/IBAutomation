@@ -51,9 +51,13 @@ public class UniqueOrderContractList extends UniqueContractList {
         // logic must be set up
         assert(logic != null);
 
-        logic.placeLimitBuyOrder(contract, 16, 100);
+        logic.placeLimitBuyOrder(contract, 16, 20);
     }
 
+    /**
+     * Takes in a {@code contract} and terminates the realtimebar request, which is no longer needed since a buy order
+     * must have been placed.
+     */
     private void cancelRealTimeBarRequestForContract(ContractWithPriceDetail contract) {
         logic.cancelRealTimeBarsForContract(contract);
     }
