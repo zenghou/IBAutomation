@@ -15,7 +15,8 @@ public class ModelManager implements Model {
     private UniqueOrderContractList uniqueOrderContractList;
 
     private UniqueContractList uniqueContractToCloseList;
-    private SellLimitOrderDetailList sellLimitOrderDetailsList;
+    private SellLimitOrderDetailList sellLimitOrderDetailList;
+    private OpenOrderDetailList openOrderDetailList;
 
     public ModelManager() {
         uniqueContractList = new UniqueContractList();
@@ -26,7 +27,9 @@ public class ModelManager implements Model {
 
         uniqueContractToCloseList = new UniqueContractList();
 
-        sellLimitOrderDetailsList = new SellLimitOrderDetailList();
+        sellLimitOrderDetailList = new SellLimitOrderDetailList();
+
+        openOrderDetailList = new OpenOrderDetailList();
     }
 
     /**
@@ -134,32 +137,32 @@ public class ModelManager implements Model {
 
     @Override
     public void updateSellLimitOrderDetailList(SellLimitOrderDetail sellLimitOrderDetail) {
-        sellLimitOrderDetailsList.updateListWith(sellLimitOrderDetail);
+        sellLimitOrderDetailList.updateListWith(sellLimitOrderDetail);
     }
 
     @Override
     public boolean isSellLimitOrderId(int orderId) {
-        return sellLimitOrderDetailsList.isSellOrderId(orderId);
+        return sellLimitOrderDetailList.isSellOrderId(orderId);
     }
 
     @Override
     public void addSellLimitOrderId(int orderId) {
-        sellLimitOrderDetailsList.addSellOrderId(orderId);
+        sellLimitOrderDetailList.addSellOrderId(orderId);
     }
 
     @Override
     public void removeSellLimitOrderId(int orderId) throws Exception {
-        sellLimitOrderDetailsList.removeSellLimitOrderId(orderId);
+        sellLimitOrderDetailList.removeSellLimitOrderId(orderId);
     }
 
     @Override
     public ArrayList<Integer> getOrderIdsForUnfilledSellLimitOrders() {
-        return sellLimitOrderDetailsList.getOrderIdsForUnfilledSellLimitOrders();
+        return sellLimitOrderDetailList.getOrderIdsForUnfilledSellLimitOrders();
     }
 
     @Override
     public HashMap<String, Double> getSymbolAndPositionsForUnfilledSellLimitOrders() {
-        return sellLimitOrderDetailsList.getSymbolsAndRemainingPositionsForUnfilledSellLimitOrders();
+        return sellLimitOrderDetailList.getSymbolsAndRemainingPositionsForUnfilledSellLimitOrders();
     }
 
     @Override
@@ -169,6 +172,20 @@ public class ModelManager implements Model {
 
     @Override
     public SellLimitOrderDetail retrieveSellLimitOrderDetailById(int orderId) {
-        return sellLimitOrderDetailsList.retrieveSellLimitOrderDetailById(orderId);
+        return sellLimitOrderDetailList.retrieveSellLimitOrderDetailById(orderId);
+    }
+
+    @Override
+    public void addOpenOrderDetail(OpenOrderDetail openOrderDetail) {
+        try {
+            openOrderDetailList.add(openOrderDetail);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public String retrieveSymbolByOrderId(int orderId) {
+        return openOrderDetailList.retrieveSymbolFromOrderId(orderId);
     }
 }

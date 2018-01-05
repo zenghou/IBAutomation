@@ -54,4 +54,8 @@ public interface Model {
     void printAllStocksInUniqueContractToCloseList();
 
     SellLimitOrderDetail retrieveSellLimitOrderDetailById(int orderId);
+
+    void addOpenOrderDetail(OpenOrderDetail openOrderDetail);
+
+    String retrieveSymbolByOrderId(int orderId);
 }
