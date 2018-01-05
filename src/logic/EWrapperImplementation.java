@@ -216,7 +216,7 @@ public class EWrapperImplementation implements EWrapper {
 
             try {
                 LOGGER.info("***************************[ SellLimitOrderDetail: Attempting to add symbol " +
-                        contract.symbol() + " to order id: " + orderId + "]******************************");
+                        contract.symbol() + " to order id: " + orderId + " ]******************************");
 
                 sellLimitOrderDetail.setSymbol(contract.symbol());
             } catch (Exception e) {
