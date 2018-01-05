@@ -91,7 +91,7 @@ public class MainApp {
         model.printAllStocksInUniqueContractToCloseList();
 
         // submit sell limit orders to IB
-        logic.setLimitSellOrdersForAllExistingPositions(5);
+        logic.setLimitSellOrdersForAllExistingPositions(50);
     }
 
     /**
