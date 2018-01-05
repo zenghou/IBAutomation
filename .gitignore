@@ -48,3 +48,13 @@ out/production/IBSample/model/ContractBuilder\.class
 out/production/IBSample/Logic/Logic\.class
 
 IBAutomaticTradingLog\.1
+
+out/production/IBSample/logic/DateBuilder\.class
+
+out/production/IBSample/logic/ScheduledCancelUnfilledOrders\.class
+
+out/production/IBSample/logic/ScheduledMarketOnClose\.class
+
+out/production/IBSample/Model/SellLimitOrderDetail\.class
+
+out/production/IBSample/Model/SellLimitOrderDetailList\.class
