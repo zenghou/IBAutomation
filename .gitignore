@@ -58,3 +58,7 @@ out/production/IBSample/logic/ScheduledMarketOnClose\.class
 out/production/IBSample/Model/SellLimitOrderDetail\.class
 
 out/production/IBSample/Model/SellLimitOrderDetailList\.class
+
+out/production/IBSample/model/OpenOrderDetail\.class
+
+out/production/IBSample/model/OpenOrderDetailList\.class
