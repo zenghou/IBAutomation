@@ -1,10 +1,14 @@
 package model;
 
+import java.util.logging.Logger;
+
 /**
  * Stores the details (orderId, shares filled, shares remaining) for a particular sell order when
  * {@see EWrapperImplementation#orderStatus()} is called. Object can be uniqued identified by the {@see orderId} assigned.
  */
 public class SellLimitOrderDetail {
+    private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
     private int orderId;
     private double filled;
     private double remaining;
@@ -17,7 +21,7 @@ public class SellLimitOrderDetail {
         this.filled = filled;
         this.remaining = remaining;
         hasSymbol = false;
-        symbol = null;
+        symbol = "";
 
         if (remaining == 0.00) {
             isFullyFilled = true;
@@ -62,9 +66,12 @@ public class SellLimitOrderDetail {
     }
 
     public void setSymbol(String symbol) throws Exception {
-        if (this.symbol.equals(null)) {
+        if (this.symbol.length() == 0 || hasSymbol)  {
             this.symbol = symbol;
             this.hasSymbol = true;
+
+            LOGGER.info("=========================[ Symbol for sellLimitOrderDetail has been set to: " + symbol +
+                    " ]=========================");
         } else {
             throw new Exception("SellLimitOrderDetail already has a symbol: " + symbol);
         }
