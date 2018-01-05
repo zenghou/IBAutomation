@@ -12,6 +12,7 @@ import com.ib.client.*;
 import model.ContractBuilder;
 import model.ContractWithPriceDetail;
 import model.Model;
+import model.OpenOrderDetail;
 import model.SellLimitOrderDetail;
 import model.UniqueContractList;
 import model.exceptions.DuplicateContractException;
@@ -188,13 +189,29 @@ public class EWrapperImplementation implements EWrapper {
                     "ORDER DETAIL LIST!! ] @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         }
 
-        if (model.isSellLimitOrderId(orderId)) {
+        if (model.isSellLimitOrderId(orderId) && !isCancellationStatus(status)) {
             LOGGER.info("=============================[ Attempting to update SellLimitOrderDetailList for " +
                     orderId + "]===========================");
 
             SellLimitOrderDetail sellLimitOrderDetail = new SellLimitOrderDetail(orderId, filled, remaining);
             model.updateSellLimitOrderDetailList(sellLimitOrderDetail);
+
+            // add Symbol for SellLimitOrderDetail
+            String symbol = model.retrieveSymbolByOrderId(orderId);
+
+            try {
+                LOGGER.info("***************************[ SellLimitOrderDetail: Attempting to add symbol " +
+                        symbol + " to order id: " + orderId + " ]******************************");
+
+                sellLimitOrderDetail.setSymbol(symbol);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    private boolean isCancellationStatus(String status) {
+        return (status.equals("PendingCancel") || status.equals("Cancelled"));
     }
 
     @Override
@@ -211,18 +228,23 @@ public class EWrapperImplementation implements EWrapper {
                     "ORDER DETAIL LIST!! ] @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         }
 
-        if (model.isSellLimitOrderId(orderId)) {
-            SellLimitOrderDetail sellLimitOrderDetail = model.retrieveSellLimitOrderDetailById(orderId);
+        OpenOrderDetail newOpenOrderDetail = new OpenOrderDetail(orderId, contract);
 
-            try {
-                LOGGER.info("***************************[ SellLimitOrderDetail: Attempting to add symbol " +
-                        contract.symbol() + " to order id: " + orderId + " ]******************************");
+        model.addOpenOrderDetail(newOpenOrderDetail);
 
-                sellLimitOrderDetail.setSymbol(contract.symbol());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+//        if (model.isSellLimitOrderId(orderId)) {
+//            // null value; openOrder is called before orderStatus is updated
+//            SellLimitOrderDetail sellLimitOrderDetail = model.retrieveSellLimitOrderDetailById(orderId);
+//
+//            try {
+//                LOGGER.info("***************************[ SellLimitOrderDetail: Attempting to add symbol " +
+//                        contract.symbol() + " to order id: " + orderId + " ]******************************");
+//
+//                sellLimitOrderDetail.setSymbol(contract.symbol());
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
     }
 
     @Override
