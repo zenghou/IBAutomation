@@ -66,7 +66,7 @@ public class SellLimitOrderDetail {
     }
 
     public void setSymbol(String symbol) throws Exception {
-        if (this.symbol.length() == 0 || hasSymbol)  {
+        if (!hasSymbol)  {
             this.symbol = symbol;
             this.hasSymbol = true;
 
