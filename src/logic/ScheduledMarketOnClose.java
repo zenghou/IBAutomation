@@ -1,5 +1,6 @@
 package logic;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimerTask;
@@ -25,6 +26,9 @@ public class ScheduledMarketOnClose extends TimerTask {
 
     @Override
     public void run() {
+        Date timeNow = new Date();
+        LOGGER.info("======================== [ Executing Scheduled Cancellation of Unfilled Orders at " + timeNow +
+                " ] ========================");
         submitMarketOnCloseOrders();
     }
 

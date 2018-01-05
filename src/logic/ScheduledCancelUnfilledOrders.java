@@ -1,6 +1,7 @@
 package logic;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.TimerTask;
 import java.util.logging.Logger;
 
@@ -20,6 +21,10 @@ public class ScheduledCancelUnfilledOrders extends TimerTask {
 
     @Override
     public void run() {
+        Date timeNow = new Date();
+        LOGGER.info("======================== [ Executing Scheduled Cancellation of Unfilled Orders at " + timeNow +
+                " ] ========================");
+
         ArrayList<Integer> orderIdsForCancellation = model.getOrderIdsForUnfilledSellLimitOrders();
         cancelUnfilledSellLimitOrders(orderIdsForCancellation);
     }
