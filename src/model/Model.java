@@ -3,16 +3,14 @@ package model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * The API of the model component
  */
 public interface Model {
     /** Returns a UniqueContractList object */
-    UniqueContractList getUniqueContractList();
-
-    /** Returns a list of iterable Contracts from a UniqueContractList object */
-    ArrayList<ContractWithPriceDetail> getViewOnlyContractWithPriceDetailList();
+    ListOfUniqueContractList getUniqueContractLists();
 
     /** Sets up a model with a {@see listOfSymbols} and {@see UniqueContractList} */
     void initializeModel();

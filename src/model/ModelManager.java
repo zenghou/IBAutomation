@@ -11,7 +11,11 @@ import model.exceptions.FullContractListException;
 public class ModelManager implements Model {
     /** List of symbols prepared after {@code Parser} reads the csv file */
     private HashMap<String, Double> tickerPriceHashMap;
-    private UniqueContractList uniqueContractList;
+
+    // keeps track of all the contracts read in from the CSV file
+    private ListOfUniqueContractList uniqueContractLists;
+
+    // stores a list of the contracts to be submitted for an order
     private UniqueOrderContractList uniqueOrderContractList;
 
     private UniqueContractList uniqueContractToCloseList;
@@ -19,11 +23,12 @@ public class ModelManager implements Model {
     private OpenOrderDetailList openOrderDetailList;
 
     public ModelManager() {
-        uniqueContractList = new UniqueContractList();
+        uniqueContractLists = new ListOfUniqueContractList();
+
         tickerPriceHashMap = new HashMap<>();
 
         // uniqueOrderContractList holds at most 15 contracts
-        uniqueOrderContractList = new UniqueOrderContractList(15);
+        uniqueOrderContractList = new UniqueOrderContractList(150);
 
         uniqueContractToCloseList = new UniqueContractList();
 
@@ -48,8 +53,8 @@ public class ModelManager implements Model {
     }
 
     @Override
-    public UniqueContractList getUniqueContractList() {
-        return uniqueContractList;
+    public ListOfUniqueContractList getUniqueContractLists() {
+        return uniqueContractLists;
     }
 
     @Override
@@ -58,20 +63,9 @@ public class ModelManager implements Model {
     }
 
     @Override
-    public ArrayList<ContractWithPriceDetail> getViewOnlyContractWithPriceDetailList() {
-        return uniqueContractList.getContractArrayWithPriceDetailList();
-    }
-
-    @Override
     public ContractWithPriceDetail retrieveContractWithPriceDetailByReqId(int reqId) {
         ContractWithPriceDetail contractWithPriceDetail = null;
-        for (ContractWithPriceDetail contract: uniqueContractList
-                .getContractArrayWithPriceDetailList()) {
-            if (contract.getRequestId() == reqId) {
-                contractWithPriceDetail = contract;
-                break;
-            }
-        }
+        contractWithPriceDetail = uniqueContractLists.retrieveContractByRequestId(reqId);
         assert(contractWithPriceDetail != null);
         return contractWithPriceDetail;
     }
@@ -87,7 +81,7 @@ public class ModelManager implements Model {
 
                 String ticker = entry.getKey();
                 Double price = entry.getValue();
-                uniqueContractList.addContract(ContractBuilder.buildContractWithPriceDetail(ticker, price));
+                uniqueContractLists.addContract(ContractBuilder.buildContractWithPriceDetail(ticker, price));
             }
         } catch (DuplicateContractException dce) {
             System.out.println(dce.getMessage() + "\n" + "There should not be any duplicate symbols");
@@ -101,7 +95,7 @@ public class ModelManager implements Model {
     public void updateUniqueContractList(ContractWithPriceDetail contract) {
         try {
             //TODO: change to update contract method (to use observer/observable)
-            uniqueContractList.updateContractList(contract);
+            uniqueContractLists.updateListOfUniqueContractList(contract);
         } catch (DuplicateContractException dce) {
             System.out.println(dce.getMessage() + "\n" + "There should not be any duplicate for " + contract.symbol());
         } catch (FullContractListException fcle) {
