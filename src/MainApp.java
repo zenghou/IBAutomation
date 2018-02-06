@@ -19,6 +19,7 @@ import logic.Logic;
 import logic.LogicManager;
 import model.Model;
 import model.ModelManager;
+import model.UniqueContractList;
 
 public class MainApp {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -46,7 +47,9 @@ public class MainApp {
 
         logic = new LogicManager(model, eClientSocket, eWrapper);
 
-        model.getUniqueContractList().addObserver(logic);
+        for (UniqueContractList eachList : model.getUniqueContractLists().getArrayList()) {
+            eachList.addObserver(logic);
+        }
 
         timer = new Timer();
 
@@ -111,7 +114,7 @@ public class MainApp {
     private void initiateBuying() throws Exception {
         LOGGER.log(Level.INFO, "=============================[ Initiate Buying Process ]===========================");
         // submitting of valid orders for today's session
-        logic.getRealTimeBars();
+        logic.getRealTimeMarketData();
 
         // read CSV file every 30 seconds
         timer.schedule(logic.getParser(), 0, 30000);
@@ -152,9 +155,9 @@ public class MainApp {
         MainApp mainApp = new MainApp();
         mainApp.init();
 
-        mainApp.initiateSellLimitOrders();
+         mainApp.initiateSellLimitOrders();
 
-        mainApp.initiateScheduledCancellationAndMarketClose();
+         mainApp.initiateScheduledCancellationAndMarketClose();
 
         mainApp.initiateBuying();
     }
