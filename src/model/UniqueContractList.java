@@ -15,8 +15,9 @@ import model.exceptions.FullContractListException;
 public class UniqueContractList extends Observable {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    private final int DEFAULT_ARRAY_SIZE = 1000;
-    // default array size will be 1000
+    private final int DEFAULT_ARRAY_SIZE = 80;
+
+    // default array size will be 96
     private int arraySize = DEFAULT_ARRAY_SIZE;
 
     private final ArrayList <ContractWithPriceDetail> contractWithPriceDetailArrayList;
@@ -70,5 +71,20 @@ public class UniqueContractList extends Observable {
             LOGGER.info(numberOfSymbols + ": " + contract.symbol() + ", position: " + contract.getPosition());
             numberOfSymbols++;
         }
+    }
+
+    /**
+     * Checks if this UniqueContractList is full
+     */
+    public boolean isFull() {
+        return (this.contractWithPriceDetailArrayList.size() == DEFAULT_ARRAY_SIZE);
+    }
+
+    public boolean containsContract(ContractWithPriceDetail contract) {
+        return this.contractWithPriceDetailArrayList.contains(contract);
+    }
+
+    public ArrayList<ContractWithPriceDetail> getInternalArray() {
+        return this.contractWithPriceDetailArrayList;
     }
 }
