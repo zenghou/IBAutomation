@@ -10,7 +10,9 @@ import com.ib.client.EClientSocket;
 import com.ib.client.Order;
 
 import model.ContractWithPriceDetail;
+import model.ListOfUniqueContractList;
 import model.Model;
+import model.UniqueContractList;
 
 public class LogicManager implements Logic{
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -51,52 +53,74 @@ public class LogicManager implements Logic{
     // ===================================== HANDLES BUYING ASPECT =======================================
     // ===================================================================================================
 
+
     /**
      * Loops through model's contract list and retrieves realtimebars for each stock inside
-     * eClientSocket to transmit request message from client to TWS se
-     *
-     * rver
+     * eClientSocket to transmit request message from client to TWS server
      * @throws InterruptedException
      */
     @Override
-    public void getRealTimeBars() throws InterruptedException {
-        LOGGER.info("=============================[ Requesting for real time bars ]===========================");
+    public void getRealTimeMarketData() {
+        ListOfUniqueContractList uniqueContractLists = model.getUniqueContractLists();
 
-        for (ContractWithPriceDetail contract: model.getViewOnlyContractWithPriceDetailList()) {
-            // Print log
-            // System.out.println("Getting price for: " + contract.symbol());
-            // System.out.println("current id is: " + requestId);
+        while (true) {
+            UniqueContractList contractList = uniqueContractLists.getNextUniqueContractList();
 
-            LOGGER.info("=============================[ Req " + requestId + ": Retrieving price for " +
-                    contract.symbol() + " ]=============================");
+            for (ContractWithPriceDetail contract: contractList.getInternalArray()) {
+                // set unique req Id for each contract
+//                if (!contract.hasRequestId()) {
+//                    setRequestIdForContractWithPriceDetail(requestId, contract);
+//                }
+                setRequestIdForContractWithPriceDetail(requestId, contract);
 
-            // set unique req Id for each contract
-            setRequestIdForContractWithPriceDetail(requestId, contract);
+                //TODO: is requestId the same as tickerId?
+                eClientSocket.reqMktData(requestId, contract, "", false,
+                        false, null);
+                requestId++;
+            }
 
-            eClientSocket.reqRealTimeBars(requestId, contract, 5, "MIDPOINT",
-                    true, null);
-            requestId++;
+            // wait for call back methods to be completed
+            pauseThread(2000);
+
+            // cancel existing batch to free up governer limits
+            cancelRealTimeMarketDataForUniqueContractList(contractList);
+
+            // wait for call back methods to be completed
+            pauseThread(2000);
         }
     }
 
-    /**
-     * Similar to {@see getRealTimeBars} except that the data for a specific stock is submitted. This method is used for
-     * requesting data of a stock that is newly added to the {@see UniqueContractList}
-     * @param contract
-     * @throws InterruptedException
-     */
-    private void getRealTimeBarsForContract(ContractWithPriceDetail contract) throws InterruptedException {
-        LOGGER.info("=============================[ Req " + requestId + ": Retrieving price for newly added " +
-                contract.symbol() + " ]=============================");
-
-        // set unique req Id for each contract
-        setRequestIdForContractWithPriceDetail(requestId, contract);
-
-        eClientSocket.reqRealTimeBars(requestId, contract, 5, "MIDPOINT",
-                true, null);
-
-        requestId++;
+    private void pauseThread(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
+
+    public void cancelRealTimeMarketDataForUniqueContractList(UniqueContractList uniqueContractList) {
+        for (ContractWithPriceDetail contract : uniqueContractList.getInternalArray()) {
+            int requestId = contract.getRequestId();
+//            LOGGER.info("=============================[ Cancelling market data for ReqId:" + requestId + " [ " +
+//                    contract.symbol() + "] ]=============================");
+
+            eClientSocket.cancelMktData(requestId);
+        }
+    }
+
+//    private void getRealTimeMarketDataForContract(ContractWithPriceDetail contract) throws InterruptedException {
+//        LOGGER.info("=============================[ Req " + requestId + ": Retrieving  market data (OHLC) for newly added " +
+//                contract.symbol() + " ]=============================");
+//
+//        // set unique req Id for each contract
+//        if (!contract.hasRequestId()) {
+//            setRequestIdForContractWithPriceDetail(requestId, contract);
+//        }
+//
+//        eClientSocket.reqMktData(requestId, contract, "", false,
+//                false, null);
+//        requestId++;
+//    }
 
     @Override
     public int getCurrentOrderId() {
@@ -114,6 +138,15 @@ public class LogicManager implements Logic{
         eClientSocket.cancelRealTimeBars(contractRequestId);
 
         LOGGER.info("=============================[ Cancelling realTimeBars for ID:  " + requestId + ", Symbol: " +
+                contract.symbol() + " ]=============================");
+    }
+
+    @Override
+    public void cancelRealTImeMarketDataForContract(ContractWithPriceDetail contract) {
+        int contractRequestId = contract.getRequestId();
+        eClientSocket.cancelMktData(contractRequestId);
+
+        LOGGER.info("=============================[ Cancelling reqMktData for ID:  " + requestId + ", Symbol: " +
                 contract.symbol() + " ]=============================");
     }
 
@@ -299,10 +332,12 @@ public class LogicManager implements Logic{
     @Override
     public void update(Observable o, Object arg) {
         ContractWithPriceDetail contract = (ContractWithPriceDetail) arg;
-        try {
-            getRealTimeBarsForContract(contract);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        System.out.println("New contract: " + contract.symbol() + " has been added. No update needed from observer " +
+                "ince the uniqueContractLists are continually being looped");
+//        try {
+//            getRealTimeMarketDataForContract(contract);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 }

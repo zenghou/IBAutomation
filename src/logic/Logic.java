@@ -9,10 +9,11 @@ import com.ib.client.Order;
 import model.ContractWithPriceDetail;
 
 public interface Logic extends Observer {
+
     /**
-     * Get real-time stock prices
+     * Requests for market data (to access OLHC)
      */
-    void getRealTimeBars() throws InterruptedException;
+    void getRealTimeMarketData();
 
     /**
      * Takes in a {@code stock} whose current price is {@code percentageBelow} opening price
@@ -24,6 +25,11 @@ public interface Logic extends Observer {
      * Cancels the real time bar subscription for {@code ContractWithPriceDetail}
      */
     void cancelRealTimeBarsForContract(ContractWithPriceDetail contract);
+
+    /**
+     * Cancels the reqMktData subscription for {@code ContractWithPriceDetail}
+     */
+    void cancelRealTImeMarketDataForContract(ContractWithPriceDetail contract);
 
     /** Returns the Parser object used */
     Parser getParser();
