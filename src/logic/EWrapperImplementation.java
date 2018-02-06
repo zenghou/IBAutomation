@@ -20,6 +20,7 @@ import model.exceptions.FullContractListException;
 
 public class EWrapperImplementation implements EWrapper {
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+    private static final int FIELD_ID_LOW = 7;
 
     private EReaderSignal readerSignal;
     private EClientSocket clientSocket;
@@ -262,16 +263,42 @@ public class EWrapperImplementation implements EWrapper {
         System.out.println("Account download finished: " + accountName + "\n");
     }
 
+    /* ========================================================================================================== */
+    /* ============================= HANDLES CALLBACK FOR eClient#reqMktData ==================================== */
+    /* ========================================================================================================== */
+
     @Override
     public void tickPrice(int tickerId, int field, double price, TickAttr attribs) {
-        System.out.println("Tick Price. Ticker Id:"+tickerId+", Field: "+field+", Price: "+price+", CanAutoExecute: "+ attribs.canAutoExecute()
-                + ", pastLimit: " + attribs.pastLimit() + ", pre-open: " + attribs.preOpen());
+//        System.out.println("Tick Price. Ticker Id:" + tickerId + ", Field: " + field + ", Price: " + price +
+//                ", CanAutoExecute: " + attribs.canAutoExecute() + ", pastLimit: " + attribs.pastLimit() +
+//                ", pre-open: " + attribs.preOpen());
+
+        if (isLowPrice(field)) {
+
+            // retrieve contract by reqId
+            ContractWithPriceDetail contract = model.retrieveContractWithPriceDetailByReqId(tickerId);
+            LOGGER.info("=============================[ Req " + contract.getRequestId() + ": Retrieving " +
+                    contract.symbol() + "'s low price - $" + price + " ]=============================");
+
+            if (isReadyForOrderSubmissionAtCurrentPrice(contract, price)) {
+                LOGGER.info("=============================[ " +  contract.symbol() +
+                        " is ready for order submission! ]===========================");
+
+                addContractToUniqueOrderList(contract);
+            }
+        }
     }
 
-    //! [ticksize]
+    /**
+     * Takes in {@param field} and determines if it is the field value for the stock's low.
+     */
+    private boolean isLowPrice(int field) {
+        return field == FIELD_ID_LOW;
+    }
+
     @Override
     public void tickSize(int tickerId, int field, int size) {
-        System.out.println("Tick Size. Ticker Id:" + tickerId + ", Field: " + field + ", Size: " + size);
+//        System.out.println("Tick Size. Ticker Id:" + tickerId + ", Field: " + field + ", Size: " + size);
     }
     //! [ticksize]
 
@@ -289,14 +316,14 @@ public class EWrapperImplementation implements EWrapper {
     //! [tickgeneric]
     @Override
     public void tickGeneric(int tickerId, int tickType, double value) {
-        System.out.println("Tick Generic. Ticker Id:" + tickerId + ", Field: " + TickType.getField(tickType) + ", Value: " + value);
+//        System.out.println("Tick Generic. Ticker Id:" + tickerId + ", Field: " + TickType.getField(tickType) + ", Value: " + value);
     }
     //! [tickgeneric]
 
     //! [tickstring]
     @Override
     public void tickString(int tickerId, int tickType, String value) {
-        System.out.println("Tick string. Ticker Id:" + tickerId + ", Type: " + tickType + ", Value: " + value);
+//        System.out.println("Tick string. Ticker Id:" + tickerId + ", Type: " + tickType + ", Value: " + value);
     }
     //! [tickstring]
     @Override
@@ -678,7 +705,7 @@ public class EWrapperImplementation implements EWrapper {
     //! [tickReqParams]
     @Override
     public void tickReqParams(int tickerId, double minTick, String bboExchange, int snapshotPermissions) {
-        System.out.println("Tick req params. Ticker Id:" + tickerId + ", Min tick: " + minTick + ", bbo exchange: " + bboExchange + ", Snapshot permissions: " + snapshotPermissions);
+//        System.out.println("Tick req params. Ticker Id:" + tickerId + ", Min tick: " + minTick + ", bbo exchange: " + bboExchange + ", Snapshot permissions: " + snapshotPermissions);
     }
     //! [tickReqParams]
 
