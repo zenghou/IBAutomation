@@ -40,7 +40,7 @@ public class UniqueOrderContractList extends UniqueContractList {
         newContractAddedNotifyLogicToSendOrder(contract);
 
         // notify Logic to stop requesting real time bars for contract
-        cancelRealTimeBarRequestForContract(contract);
+        cancelRealTimeMarketDataRequestForContract(contract);
     }
 
     /**
@@ -51,7 +51,6 @@ public class UniqueOrderContractList extends UniqueContractList {
         // logic must be set up
         assert(logic != null);
 
-        logic.placeLimitBuyOrder(contract, 16, 20);
     }
 
     /**
@@ -60,6 +59,14 @@ public class UniqueOrderContractList extends UniqueContractList {
      */
     private void cancelRealTimeBarRequestForContract(ContractWithPriceDetail contract) {
         logic.cancelRealTimeBarsForContract(contract);
+    }
+
+    /**
+     * Takes in a {@code contract} and terminates reqMktData, which is no longer needed since a buy order
+     * must have been placed.
+     */
+    private void cancelRealTimeMarketDataRequestForContract(ContractWithPriceDetail contract) {
+        logic.cancelRealTImeMarketDataForContract(contract);
     }
 
     public void printAll() {
