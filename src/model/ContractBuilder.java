@@ -6,7 +6,7 @@ import com.ib.client.Contract;
 import model.ContractWithPriceDetail;
 
 public class ContractBuilder {
-    public static final double MINIMUM_PERCENTAGE_DECREASE = 13.00;
+    public static final double MINIMUM_PERCENTAGE_DECREASE = 6.00;
 
     /**
      * Creates a {@see ContractWithPriceDetail} object with a stock symbol and its opening price
