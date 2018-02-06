@@ -82,11 +82,12 @@ public class ContractWithPriceDetail extends Contract{
      * Assigns this Contract with a request Id after realTimeBars is called. Only able to set the requestId once.
      * Guaranteed to be immutable.
      */
-    public void setRequestId(int requestId) throws Exception {
-        if (this.requestId != -1) {
-            throw new Exception("Cannot change requestId!");
-        }
+    public void setRequestId(int requestId) {
         this.requestId = requestId;
+    }
+
+    public boolean hasRequestId() {
+        return (this.requestId != -1);
     }
 
     /**
@@ -131,5 +132,15 @@ public class ContractWithPriceDetail extends Contract{
 
     public double getAverageCost() {
         return averageCost;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof ContractWithPriceDetail) {
+            ContractWithPriceDetail toBeCompared = (ContractWithPriceDetail) other;
+            return super.equals(other) && (toBeCompared.getRequestId() == this.getRequestId());
+
+        }
+        return false;
     }
 }
