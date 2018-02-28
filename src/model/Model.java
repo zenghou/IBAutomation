@@ -56,4 +56,6 @@ public interface Model {
     void addOpenOrderDetail(OpenOrderDetail openOrderDetail);
 
     String retrieveSymbolByOrderId(int orderId);
+
+    boolean hasSentOrderForContract(ContractWithPriceDetail contractWithPriceDetail);
 }

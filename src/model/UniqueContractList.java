@@ -2,6 +2,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Observable;
 import java.util.logging.Logger;
 
@@ -15,10 +16,9 @@ import model.exceptions.FullContractListException;
 public class UniqueContractList extends Observable {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    private final int DEFAULT_ARRAY_SIZE = 80;
-
-    // default array size will be 96
+    public static final int DEFAULT_ARRAY_SIZE = 80;
     private int arraySize = DEFAULT_ARRAY_SIZE;
+    private int listNumber;
 
     private final ArrayList <ContractWithPriceDetail> contractWithPriceDetailArrayList;
 
@@ -31,6 +31,14 @@ public class UniqueContractList extends Observable {
         // replace default array size
         arraySize = maxNumberOfContracts;
         contractWithPriceDetailArrayList = new ArrayList<>(maxNumberOfContracts);
+    }
+
+    public void setListNumber(int listNumber) {
+        this.listNumber = listNumber;
+    }
+
+    public int getListNumber() {
+        return this.listNumber;
     }
 
     public void addContract(ContractWithPriceDetail contract) throws FullContractListException,
@@ -73,6 +81,15 @@ public class UniqueContractList extends Observable {
         }
     }
 
+    public ArrayList<String> getSortedListOfSymbols() {
+        ArrayList<String> listOfSymbols = new ArrayList<>(DEFAULT_ARRAY_SIZE);
+        for (ContractWithPriceDetail contract : contractWithPriceDetailArrayList) {
+            listOfSymbols.add(contract.symbol());
+        }
+        Collections.sort(listOfSymbols);
+        return listOfSymbols;
+    }
+
     /**
      * Checks if this UniqueContractList is full
      */
@@ -82,6 +99,10 @@ public class UniqueContractList extends Observable {
 
     public boolean containsContract(ContractWithPriceDetail contract) {
         return this.contractWithPriceDetailArrayList.contains(contract);
+    }
+
+    public int size() {
+        return this.contractWithPriceDetailArrayList.size();
     }
 
     public ArrayList<ContractWithPriceDetail> getInternalArray() {

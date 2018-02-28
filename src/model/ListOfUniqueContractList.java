@@ -17,21 +17,25 @@ public class ListOfUniqueContractList {
     // current number of UniqueContractList objects stored
     private int numberOfUniqueContractList;
 
-    // external
+    // external pointer to loop through lists
     private int indexForNextUniqueContractList;
 
     public ListOfUniqueContractList() {
         // initialize ListOfUniqueContractLst with one UniqueContractList
         uniqueContractLists = new ArrayList<>();
-        uniqueContractLists.add(new UniqueContractList());
         indexForNextAvailableList = 0;
         numberOfUniqueContractList = 1;
 
         // start from the first list
         indexForNextUniqueContractList = 0;
+
+        UniqueContractList initialContractList = new UniqueContractList();
+        initialContractList.setListNumber(indexForNextAvailableList);
+        uniqueContractLists.add(initialContractList);
     }
 
     public void addContract(ContractWithPriceDetail contract) throws FullContractListException, DuplicateContractException {
+        //TODO: check if any contractList already contains the stock
          if (isCurrentListFull()) {
              // only add new UniqueContractList when current one is full
              addNewUniqueContractList();
@@ -42,12 +46,14 @@ public class ListOfUniqueContractList {
     }
 
     private void addNewUniqueContractList() {
-        // add new UniqueContractList
-        uniqueContractLists.add(new UniqueContractList());
-
         // increment index and number of unique contract list
         indexForNextAvailableList++;
         numberOfUniqueContractList++;
+
+        // add new UniqueContractList
+        UniqueContractList newUniqueContractList = new UniqueContractList();
+        newUniqueContractList.setListNumber(indexForNextAvailableList);
+        uniqueContractLists.add(newUniqueContractList);
     }
 
     public boolean isCurrentListFull() {
@@ -106,8 +112,7 @@ public class ListOfUniqueContractList {
 
     public ContractWithPriceDetail retrieveContractByRequestId(int reqId) {
         for (UniqueContractList eachList : uniqueContractLists) {
-            for (ContractWithPriceDetail contract: eachList
-                    .getContractArrayWithPriceDetailList()) {
+            for (ContractWithPriceDetail contract: eachList.getContractArrayWithPriceDetailList()) {
                 if (contract.getRequestId() == reqId) {
                     return contract;
                 }

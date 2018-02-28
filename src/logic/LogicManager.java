@@ -5,16 +5,22 @@ import java.text.DecimalFormat;
 import java.util.Observable;
 import java.util.logging.Logger;
 
+import com.google.common.eventbus.Subscribe;
 import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 import com.ib.client.Order;
 
+import Events.EventManager;
+import Events.EventsCenter;
+import Events.MarketDataRequestCompleteEvent;
+import Events.MarketDataRequestEvent;
 import model.ContractWithPriceDetail;
 import model.ListOfUniqueContractList;
 import model.Model;
 import model.UniqueContractList;
+import model.UniqueOrderContractList;
 
-public class LogicManager implements Logic{
+public class LogicManager extends EventManager implements Logic{
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private Model model;
@@ -27,6 +33,8 @@ public class LogicManager implements Logic{
 
     private int requestId = 1;
     private int numberOfSellLimitOrdersSubmitted = 0;
+
+    private int currentNumberOfStockRequests = 0;
 
     public LogicManager(Model modelManager, EClientSocket eClientSocket, EWrapperImplementation eWrapperImplementation) {
         this.model = modelManager;
@@ -42,6 +50,23 @@ public class LogicManager implements Logic{
 
         cancelUnfilledOrdersTask = new ScheduledCancelUnfilledOrders(this, model);
         marketOnCloseTask = new ScheduledMarketOnClose(this, model);
+        registerAsAnEventHandler(this);
+    }
+
+    /**
+     * Registers the object as an event handler at the {@link EventsCenter}
+     * @param handler usually {@code this}
+     */
+    protected void registerAsAnEventHandler(Object handler) {
+        EventsCenter.getInstance().registerHandler(handler);
+    }
+
+    @Subscribe
+    public void handleMarketDataRequestCompleteEvent(MarketDataRequestCompleteEvent event) {
+        LOGGER.info("MarketDatRequestCompleteEvent handled");
+        cancelRealTimeMarketDataForUniqueContractList(event.getRequestedContractList());
+
+        this.getRealTimeMarketData();
     }
 
     @Override
@@ -53,9 +78,8 @@ public class LogicManager implements Logic{
     // ===================================== HANDLES BUYING ASPECT =======================================
     // ===================================================================================================
 
-
     /**
-     * Loops through model's contract list and retrieves realtimebars for each stock inside
+     * Loops through model's contract list and retrieves real time market data for each stock inside
      * eClientSocket to transmit request message from client to TWS server
      * @throws InterruptedException
      */
@@ -63,64 +87,34 @@ public class LogicManager implements Logic{
     public void getRealTimeMarketData() {
         ListOfUniqueContractList uniqueContractLists = model.getUniqueContractLists();
 
-        while (true) {
-            UniqueContractList contractList = uniqueContractLists.getNextUniqueContractList();
+        UniqueContractList contractList = uniqueContractLists.getNextUniqueContractList();
 
-            for (ContractWithPriceDetail contract: contractList.getInternalArray()) {
-                // set unique req Id for each contract
-//                if (!contract.hasRequestId()) {
-//                    setRequestIdForContractWithPriceDetail(requestId, contract);
-//                }
-                setRequestIdForContractWithPriceDetail(requestId, contract);
+         currentNumberOfStockRequests = contractList.size();
 
-                //TODO: is requestId the same as tickerId?
-                eClientSocket.reqMktData(requestId, contract, "", false,
-                        false, null);
-                requestId++;
-            }
+        // sent event to EWrapperImplementation
+        raise(new MarketDataRequestEvent(currentNumberOfStockRequests, contractList));
 
-            // wait for call back methods to be completed
-            pauseThread(2000);
+        for (ContractWithPriceDetail contract: contractList.getInternalArray()) {
+            setRequestIdForContractWithPriceDetail(requestId, contract);
 
-            // cancel existing batch to free up governer limits
-            cancelRealTimeMarketDataForUniqueContractList(contractList);
-
-            // wait for call back methods to be completed
-            pauseThread(2000);
-        }
-    }
-
-    private void pauseThread(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            eClientSocket.reqMktData(requestId, contract, "", false,
+                    false, null);
+            requestId++;
         }
     }
 
     public void cancelRealTimeMarketDataForUniqueContractList(UniqueContractList uniqueContractList) {
         for (ContractWithPriceDetail contract : uniqueContractList.getInternalArray()) {
-            int requestId = contract.getRequestId();
-//            LOGGER.info("=============================[ Cancelling market data for ReqId:" + requestId + " [ " +
-//                    contract.symbol() + "] ]=============================");
+            // only cancel
+            if (!model.hasSentOrderForContract(contract)) {
+                int requestId = contract.getRequestId();
+                LOGGER.info("=============================[ Cancelling market data for ReqId:" + requestId + " [ " +
+                        contract.symbol() + "] ]=============================");
 
-            eClientSocket.cancelMktData(requestId);
+                eClientSocket.cancelMktData(requestId);
+            }
         }
     }
-
-//    private void getRealTimeMarketDataForContract(ContractWithPriceDetail contract) throws InterruptedException {
-//        LOGGER.info("=============================[ Req " + requestId + ": Retrieving  market data (OHLC) for newly added " +
-//                contract.symbol() + " ]=============================");
-//
-//        // set unique req Id for each contract
-//        if (!contract.hasRequestId()) {
-//            setRequestIdForContractWithPriceDetail(requestId, contract);
-//        }
-//
-//        eClientSocket.reqMktData(requestId, contract, "", false,
-//                false, null);
-//        requestId++;
-//    }
 
     @Override
     public int getCurrentOrderId() {
@@ -137,7 +131,7 @@ public class LogicManager implements Logic{
         int contractRequestId = contract.getRequestId();
         eClientSocket.cancelRealTimeBars(contractRequestId);
 
-        LOGGER.info("=============================[ Cancelling realTimeBars for ID:  " + requestId + ", Symbol: " +
+        LOGGER.info("=============================[ Cancelling realTimeBars for ID:  " + contractRequestId + ", Symbol: " +
                 contract.symbol() + " ]=============================");
     }
 
@@ -146,7 +140,7 @@ public class LogicManager implements Logic{
         int contractRequestId = contract.getRequestId();
         eClientSocket.cancelMktData(contractRequestId);
 
-        LOGGER.info("=============================[ Cancelling reqMktData for ID:  " + requestId + ", Symbol: " +
+        LOGGER.info("=============================[ Cancelling reqMktData for ID:  " + contractRequestId + ", Symbol: " +
                 contract.symbol() + " ]=============================");
     }
 
@@ -158,8 +152,8 @@ public class LogicManager implements Logic{
      */
     private void setRequestIdForContractWithPriceDetail(int reqId, ContractWithPriceDetail contract) {
         try {
-            LOGGER.info("=============================[ Assigning reqId " + reqId + " to " + contract.symbol() +
-                    " ]===========================");
+//            LOGGER.info("=============================[ Assigning reqId " + reqId + " to " + contract.symbol() +
+//                    " ]===========================");
 
             contract.setRequestId(reqId);
         } catch (Exception e) {
@@ -194,7 +188,8 @@ public class LogicManager implements Logic{
 
         eWrapperImplementation.incrementOrderId();
 
-        System.out.println("Current id: " + currentOrderId + " next valid is: " + eWrapperImplementation.getCurrentOrderId());
+        System.out.println("Placed order with Id: " + currentOrderId + ". Next valid Id is: " + eWrapperImplementation.
+                getCurrentOrderId());
     }
 
     /**
@@ -291,7 +286,6 @@ public class LogicManager implements Logic{
         order.orderType("LMT");
         order.totalQuantity(quantity);
         order.lmtPrice(limitPrice);
-        order.tif("OPG");
         return order;
     }
 

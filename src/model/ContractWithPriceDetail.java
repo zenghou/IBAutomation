@@ -138,8 +138,7 @@ public class ContractWithPriceDetail extends Contract{
     public boolean equals(Object other) {
         if (other instanceof ContractWithPriceDetail) {
             ContractWithPriceDetail toBeCompared = (ContractWithPriceDetail) other;
-            return super.equals(other) && (toBeCompared.getRequestId() == this.getRequestId());
-
+            return super.equals(other) || this.symbol().equals(toBeCompared.symbol());
         }
         return false;
     }

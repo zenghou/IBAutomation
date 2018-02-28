@@ -5,10 +5,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import Events.EventManager;
 import model.exceptions.DuplicateContractException;
 import model.exceptions.FullContractListException;
 
-public class ModelManager implements Model {
+public class ModelManager extends EventManager implements Model {
     /** List of symbols prepared after {@code Parser} reads the csv file */
     private HashMap<String, Double> tickerPriceHashMap;
 
@@ -27,7 +28,7 @@ public class ModelManager implements Model {
 
         tickerPriceHashMap = new HashMap<>();
 
-        // uniqueOrderContractList holds at most 15 contracts
+        // uniqueOrderContractList holds at most 150 contracts
         uniqueOrderContractList = new UniqueOrderContractList(150);
 
         uniqueContractToCloseList = new UniqueContractList();
@@ -115,13 +116,17 @@ public class ModelManager implements Model {
         } catch (DuplicateContractException dce) {
             // TODO: Remove this temp print log
             uniqueOrderContractList.printAll();
-
             System.out.println(dce.getMessage() + "\n" + "Duplicate symbol " + contractWithPriceDetail.symbol() +
                     "should not be added!");
         } catch (FullContractListException fcle) {
             System.out.println(fcle.getMessage()+ "\n" + "Additional contracts should not be added to a full" +
                     "Contract list");
         }
+    }
+
+    @Override
+    public boolean hasSentOrderForContract(ContractWithPriceDetail contractWithPriceDetail) {
+        return uniqueOrderContractList.containsContract(contractWithPriceDetail);
     }
 
     @Override

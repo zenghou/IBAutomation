@@ -9,6 +9,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import com.google.common.eventbus.EventBus;
 import com.ib.client.EClientSocket;
 import com.ib.client.EReader;
 import com.ib.client.EReaderSignal;
@@ -155,9 +156,9 @@ public class MainApp {
         MainApp mainApp = new MainApp();
         mainApp.init();
 
-         mainApp.initiateSellLimitOrders();
+        mainApp.initiateSellLimitOrders();
 
-         mainApp.initiateScheduledCancellationAndMarketClose();
+        mainApp.initiateScheduledCancellationAndMarketClose();
 
         mainApp.initiateBuying();
     }

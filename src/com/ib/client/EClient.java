@@ -1259,8 +1259,8 @@ public abstract class EClient {
     }
 
     public synchronized void placeOrder( int id, Contract contract, Order order) {
-        LOGGER.info("=============================[ #" + id + " PLACING ORDER FOR " + contract.symbol() + " AT " +
-                order.lmtPrice() + ". TOTAL COST: USD$" + (order.lmtPrice() * order.totalQuantity()) +
+        LOGGER.info("=============================[ ORDER ID: #" + id + " PLACING ORDER FOR " + contract.symbol() +
+                " AT $" + order.lmtPrice() + ". TOTAL COST: USD$" + (order.lmtPrice() * order.totalQuantity()) +
                 " ]=============================");
 
         // not connected?

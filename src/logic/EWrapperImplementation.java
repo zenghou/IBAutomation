@@ -1,36 +1,51 @@
 package logic;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.google.common.eventbus.Subscribe;
 import com.ib.client.*;
 
+import Events.EventManager;
+import Events.MarketDataRequestCompleteEvent;
+import Events.MarketDataRequestEvent;
 import model.ContractBuilder;
 import model.ContractWithPriceDetail;
 import model.Model;
 import model.OpenOrderDetail;
 import model.SellLimitOrderDetail;
 import model.UniqueContractList;
+import model.UniqueOrderContractList;
 import model.exceptions.DuplicateContractException;
 import model.exceptions.FullContractListException;
 
-public class EWrapperImplementation implements EWrapper {
+public class EWrapperImplementation extends EventManager implements EWrapper {
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     private static final int FIELD_ID_LOW = 7;
 
     private EReaderSignal readerSignal;
-    private EClientSocket clientSocket;
+    private EClientSocket eClientSocket;
     private Model model;
 
     private int currentOrderId = -1;
+    private int currentNumberOfStockDataReceived;
+    private int currentNumberOfStockRequests;
+    private UniqueContractList requestedContractList;
+    private ArrayList<String> requestedStockSymbols;
 
     public EWrapperImplementation() {
         readerSignal = new EJavaSignal();
-        clientSocket = new EClientSocket(this, readerSignal);
+        eClientSocket = new EClientSocket(this, readerSignal);
+
+        currentNumberOfStockRequests = 0;
+        currentNumberOfStockDataReceived = 0;
+        requestedStockSymbols = new ArrayList<>(UniqueOrderContractList.DEFAULT_ARRAY_SIZE);
     }
 
     //@@author zenghou
@@ -44,7 +59,7 @@ public class EWrapperImplementation implements EWrapper {
     }
 
     public EClientSocket getClient() {
-        return clientSocket;
+        return eClientSocket;
     }
 
     public EReaderSignal getSignal() {
@@ -267,25 +282,67 @@ public class EWrapperImplementation implements EWrapper {
     /* ============================= HANDLES CALLBACK FOR eClient#reqMktData ==================================== */
     /* ========================================================================================================== */
 
+    @Subscribe
+    public void updateCurrentRequest(MarketDataRequestEvent event) {
+        LOGGER.info("=============================[ MarketDatRequestEvent Handled ]===========================");
+        this.currentNumberOfStockRequests = event.getNumberOfStocks();
+        this.requestedContractList = event.getRequestedContractList();
+    }
+
+    private void resetCurrentRequest() {
+        this.currentNumberOfStockRequests = 0;
+        this.requestedContractList = null;
+        this.requestedStockSymbols = new ArrayList<>(UniqueContractList.DEFAULT_ARRAY_SIZE);
+    }
+
     @Override
     public void tickPrice(int tickerId, int field, double price, TickAttr attribs) {
-//        System.out.println("Tick Price. Ticker Id:" + tickerId + ", Field: " + field + ", Price: " + price +
-//                ", CanAutoExecute: " + attribs.canAutoExecute() + ", pastLimit: " + attribs.pastLimit() +
-//                ", pre-open: " + attribs.preOpen());
-
         if (isLowPrice(field)) {
 
             // retrieve contract by reqId
             ContractWithPriceDetail contract = model.retrieveContractWithPriceDetailByReqId(tickerId);
-            LOGGER.info("=============================[ Req " + contract.getRequestId() + ": Retrieving " +
-                    contract.symbol() + "'s low price - $" + price + " ]=============================");
+//            LOGGER.info("=============================[ Req " + contract.getRequestId() + ": Retrieving " +
+//                    contract.symbol() + "'s low price - $" + price + " ]=============================");
+
+            // increment the number of stock data retrieve for each loop. Make sure duplicate symbols are not added
+            if (!requestedStockSymbols.contains(contract.symbol())) {
+                requestedStockSymbols.add(contract.symbol());
+                currentNumberOfStockDataReceived++;
+            }
 
             if (isReadyForOrderSubmissionAtCurrentPrice(contract, price)) {
                 LOGGER.info("=============================[ " +  contract.symbol() +
                         " is ready for order submission! ]===========================");
-
                 addContractToUniqueOrderList(contract);
             }
+
+            remainingStocks();
+
+            // check if all the stocks data for all stocks in the current UniqueContractList has been returned
+            if (isDataRequestComplete()) {
+                LOGGER.info("=============================[ Data retrieved for all stocks in UniqueContractList " +
+                        "Number: " + requestedContractList.getListNumber() + " ]=============================");
+
+                raise(new MarketDataRequestCompleteEvent(requestedContractList));
+                resetCurrentRequest();
+            }
+        }
+    }
+
+    private boolean isDataRequestComplete() {
+        if (this.currentNumberOfStockDataReceived >= this.currentNumberOfStockRequests) {
+            Collections.sort(requestedStockSymbols);
+            return (requestedStockSymbols.equals(requestedContractList.getSortedListOfSymbols()));
+        }
+        return false;
+    }
+
+    private void remainingStocks() {
+        if (this.currentNumberOfStockDataReceived >= this.currentNumberOfStockRequests) {
+            Collections.sort(requestedStockSymbols);
+            System.out.println("requested: " + this.currentNumberOfStockRequests + ' ' + requestedStockSymbols);
+            System.out.println(" received: " + this.currentNumberOfStockDataReceived + ' ' + requestedContractList.getSortedListOfSymbols());
+
         }
     }
 
@@ -574,9 +631,9 @@ public class EWrapperImplementation implements EWrapper {
     //! [connectack]
     @Override
     public void connectAck() {
-        if (clientSocket.isAsyncEConnect()) {
+        if (eClientSocket.isAsyncEConnect()) {
             System.out.println("Acknowledging connection");
-            clientSocket.startAPI();
+            eClientSocket.startAPI();
         }
     }
     //! [connectack]
