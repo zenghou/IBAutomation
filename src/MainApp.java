@@ -1,4 +1,6 @@
 //@@author zenghou
+import java.io.File;
+import java.io.FileWriter;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Timer;
@@ -40,6 +42,8 @@ public class MainApp {
     private void init() throws Exception {
         LOGGER.log(Level.INFO, "=============================[ Initializing IB Automatic Trading ]===========================");
 
+        createNewSubmittedOrdersCsv();
+
         model = new ModelManager();
 
         eWrapper = new EWrapperImplementation(model);
@@ -75,6 +79,18 @@ public class MainApp {
         // A pause to give the application time to establish the connection
         // In a production application, it would be best to wait for callbacks to confirm the connection is complete
         Thread.sleep(1000);
+    }
+
+    private void createNewSubmittedOrdersCsv() {
+        try {
+            //TODO: change filePath
+            String filePath = "/Users/ZengHou/Desktop/submittedOrders.csv";
+            FileWriter fileWriter = new FileWriter(new File(filePath));
+            fileWriter.append("Today's date" + (new Date()).toString() + "\n");
+            fileWriter.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
