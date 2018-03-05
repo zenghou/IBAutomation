@@ -1,27 +1,23 @@
 package logic;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.google.common.eventbus.Subscribe;
 import com.ib.client.*;
 
 import Events.EventManager;
-import Events.MarketDataRequestCompleteEvent;
-import Events.MarketDataRequestEvent;
 import model.ContractBuilder;
 import model.ContractWithPriceDetail;
 import model.Model;
 import model.OpenOrderDetail;
 import model.SellLimitOrderDetail;
 import model.UniqueContractList;
-import model.UniqueOrderContractList;
 import model.exceptions.DuplicateContractException;
 import model.exceptions.FullContractListException;
 
@@ -33,19 +29,11 @@ public class EWrapperImplementation extends EventManager implements EWrapper {
     private EClientSocket eClientSocket;
     private Model model;
 
-    private int currentOrderId = -1;
-    private int currentNumberOfStockDataReceived;
-    private int currentNumberOfStockRequests;
-    private UniqueContractList requestedContractList;
-    private ArrayList<String> requestedStockSymbols;
+    private static int currentOrderId = -1;
 
     public EWrapperImplementation() {
         readerSignal = new EJavaSignal();
         eClientSocket = new EClientSocket(this, readerSignal);
-
-        currentNumberOfStockRequests = 0;
-        currentNumberOfStockDataReceived = 0;
-        requestedStockSymbols = new ArrayList<>(UniqueOrderContractList.DEFAULT_ARRAY_SIZE);
     }
 
     //@@author zenghou
@@ -66,7 +54,7 @@ public class EWrapperImplementation extends EventManager implements EWrapper {
         return readerSignal;
     }
 
-    public int getCurrentOrderId() {
+    public static int getCurrentOrderId() {
         return currentOrderId;
     }
 
@@ -205,6 +193,11 @@ public class EWrapperImplementation extends EventManager implements EWrapper {
                     "ORDER DETAIL LIST!! ] @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         }
 
+        if (model.isBuyOrder(orderId)) {
+            String symbol = model.retrieveSymbolByBuyOrderId(orderId);
+            updateSubmittedOrdersCSV(orderId, symbol, avgFillPrice, remaining, filled);
+        }
+
         if (model.isSellLimitOrderId(orderId) && !isCancellationStatus(status)) {
             LOGGER.info("=============================[ Attempting to update SellLimitOrderDetailList for " +
                     orderId + "]===========================");
@@ -226,6 +219,21 @@ public class EWrapperImplementation extends EventManager implements EWrapper {
         }
     }
 
+    private void updateSubmittedOrdersCSV(int orderId, String symbol, double averageFillPrice, double remaining,
+                                          double filled) {
+        //TODO: change filePath
+        String filePath = "/Users/ZengHou/Desktop/submittedOrders.csv";
+        try {
+            FileWriter fileWriter = new FileWriter(new File(filePath), true);
+            String orderDetail = "Order Id: " + orderId + ", " + symbol + ", Average Filled Price: " +
+                    averageFillPrice + ", Remaining: " + remaining + ", Filled: " + filled + "\n";
+            fileWriter.append(orderDetail);
+            fileWriter.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private boolean isCancellationStatus(String status) {
         return (status.equals("PendingCancel") || status.equals("Cancelled"));
     }
@@ -234,8 +242,9 @@ public class EWrapperImplementation extends EventManager implements EWrapper {
     public void openOrder(int orderId, Contract contract, Order order,
                           OrderState orderState) {
 
-        System.out.println("OpenOrder. ID: "+orderId+", "+contract.symbol()+", "+contract.secType()+" @ "+contract.exchange()+": "+
-                order.action()+", "+order.orderType()+" "+order.totalQuantity()+", "+orderState.status());
+        System.out.println("OpenOrder. ID: " + orderId + ", " + contract.symbol() + ", " + contract.secType() + " @ " +
+                contract.exchange() + ": " + order.action() + ", " + order.orderType() + " " + order.totalQuantity() +
+                ", "+orderState.status());
 
         try {
             Thread.sleep(1000);
@@ -247,20 +256,6 @@ public class EWrapperImplementation extends EventManager implements EWrapper {
         OpenOrderDetail newOpenOrderDetail = new OpenOrderDetail(orderId, contract);
 
         model.addOpenOrderDetail(newOpenOrderDetail);
-
-//        if (model.isSellLimitOrderId(orderId)) {
-//            // null value; openOrder is called before orderStatus is updated
-//            SellLimitOrderDetail sellLimitOrderDetail = model.retrieveSellLimitOrderDetailById(orderId);
-//
-//            try {
-//                LOGGER.info("***************************[ SellLimitOrderDetail: Attempting to add symbol " +
-//                        contract.symbol() + " to order id: " + orderId + " ]******************************");
-//
-//                sellLimitOrderDetail.setSymbol(contract.symbol());
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
     }
 
     @Override
@@ -282,18 +277,6 @@ public class EWrapperImplementation extends EventManager implements EWrapper {
     /* ============================= HANDLES CALLBACK FOR eClient#reqMktData ==================================== */
     /* ========================================================================================================== */
 
-    @Subscribe
-    public void updateCurrentRequest(MarketDataRequestEvent event) {
-        LOGGER.info("=============================[ MarketDatRequestEvent Handled ]===========================");
-        this.currentNumberOfStockRequests = event.getNumberOfStocks();
-        this.requestedContractList = event.getRequestedContractList();
-    }
-
-    private void resetCurrentRequest() {
-        this.currentNumberOfStockRequests = 0;
-        this.requestedContractList = null;
-        this.requestedStockSymbols = new ArrayList<>(UniqueContractList.DEFAULT_ARRAY_SIZE);
-    }
 
     @Override
     public void tickPrice(int tickerId, int field, double price, TickAttr attribs) {
@@ -301,48 +284,14 @@ public class EWrapperImplementation extends EventManager implements EWrapper {
 
             // retrieve contract by reqId
             ContractWithPriceDetail contract = model.retrieveContractWithPriceDetailByReqId(tickerId);
-//            LOGGER.info("=============================[ Req " + contract.getRequestId() + ": Retrieving " +
-//                    contract.symbol() + "'s low price - $" + price + " ]=============================");
-
-            // increment the number of stock data retrieve for each loop. Make sure duplicate symbols are not added
-            if (!requestedStockSymbols.contains(contract.symbol())) {
-                requestedStockSymbols.add(contract.symbol());
-                currentNumberOfStockDataReceived++;
-            }
+            LOGGER.info("=============================[ Req " + contract.getRequestId() + ": Retrieving " +
+                    contract.symbol() + "'s low price - $" + price + " ]=============================");
 
             if (isReadyForOrderSubmissionAtCurrentPrice(contract, price)) {
                 LOGGER.info("=============================[ " +  contract.symbol() +
                         " is ready for order submission! ]===========================");
                 addContractToUniqueOrderList(contract);
             }
-
-            remainingStocks();
-
-            // check if all the stocks data for all stocks in the current UniqueContractList has been returned
-            if (isDataRequestComplete()) {
-                LOGGER.info("=============================[ Data retrieved for all stocks in UniqueContractList " +
-                        "Number: " + requestedContractList.getListNumber() + " ]=============================");
-
-                raise(new MarketDataRequestCompleteEvent(requestedContractList));
-                resetCurrentRequest();
-            }
-        }
-    }
-
-    private boolean isDataRequestComplete() {
-        if (this.currentNumberOfStockDataReceived >= this.currentNumberOfStockRequests) {
-            Collections.sort(requestedStockSymbols);
-            return (requestedStockSymbols.equals(requestedContractList.getSortedListOfSymbols()));
-        }
-        return false;
-    }
-
-    private void remainingStocks() {
-        if (this.currentNumberOfStockDataReceived >= this.currentNumberOfStockRequests) {
-            Collections.sort(requestedStockSymbols);
-            System.out.println("requested: " + this.currentNumberOfStockRequests + ' ' + requestedStockSymbols);
-            System.out.println(" received: " + this.currentNumberOfStockDataReceived + ' ' + requestedContractList.getSortedListOfSymbols());
-
         }
     }
 
