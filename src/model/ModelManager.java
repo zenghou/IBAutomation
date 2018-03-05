@@ -140,6 +140,16 @@ public class ModelManager extends EventManager implements Model {
     }
 
     @Override
+    public boolean isBuyOrder(int orderId) {
+        return uniqueOrderContractList.containsOrderId(orderId);
+    }
+
+    @Override
+    public String retrieveSymbolByBuyOrderId(int orderId) {
+        return uniqueOrderContractList.retrieveSymbolByOrderId(orderId);
+    }
+
+    @Override
     public boolean isSellLimitOrderId(int orderId) {
         return sellLimitOrderDetailList.isSellOrderId(orderId);
     }

@@ -36,6 +36,10 @@ public interface Model {
     /** Checks if an orderId is a sell order */
     boolean isSellLimitOrderId(int orderId);
 
+    boolean isBuyOrder(int orderId);
+
+    String retrieveSymbolByBuyOrderId(int orderId);
+
     /** Keeps track of the order Ids that are sell orders */
     void addSellLimitOrderId(int orderId);
 
