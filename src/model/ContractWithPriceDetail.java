@@ -12,6 +12,7 @@ public class ContractWithPriceDetail extends Contract{
     private double dayOpeningPrice;
     private double percentage;
     private int requestId;
+    private int orderId;
     private double currentPrice; // current market price of the stock
     private double position; // number of shares
     private double averageCost;
@@ -26,6 +27,7 @@ public class ContractWithPriceDetail extends Contract{
         currentPrice = DEFAULT_INVALID_VALUE;
         position = DEFAULT_INVALID_VALUE;
         averageCost = DEFAULT_INVALID_VALUE;
+        orderId = (int) DEFAULT_INVALID_VALUE;
     }
 
     public ContractWithPriceDetail(double dayOpeningPrice, double percentage) {
@@ -38,6 +40,7 @@ public class ContractWithPriceDetail extends Contract{
         currentPrice = DEFAULT_INVALID_VALUE;
         position = DEFAULT_INVALID_VALUE;
         averageCost = DEFAULT_INVALID_VALUE;
+        orderId = (int) DEFAULT_INVALID_VALUE;
     }
 
     /**
@@ -53,6 +56,18 @@ public class ContractWithPriceDetail extends Contract{
         } else {
             throw new Exception("Current price for " + symbol() + " can only be set once!");
         }
+    }
+
+    public void setOrderId(int orderId) throws Exception {
+        if (this.orderId == (int) DEFAULT_INVALID_VALUE) {
+            this.orderId = orderId;
+        } else {
+            throw new Exception("Cannot set orderId to contract with orderId:" + this.orderId);
+        }
+    }
+
+    public int getOrderId() {
+        return this.orderId;
     }
 
     /**
@@ -82,8 +97,12 @@ public class ContractWithPriceDetail extends Contract{
      * Assigns this Contract with a request Id after realTimeBars is called. Only able to set the requestId once.
      * Guaranteed to be immutable.
      */
-    public void setRequestId(int requestId) {
-        this.requestId = requestId;
+    public void setRequestId (int requestId) throws Exception {
+        if (this.requestId == DEFAULT_INVALID_VALUE) {
+            this.requestId = requestId;
+        } else {
+            throw new Exception("Cannot set request Id to Contract with Id: " + this.requestId);
+        }
     }
 
     public boolean hasRequestId() {
