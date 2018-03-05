@@ -12,13 +12,10 @@ import com.ib.client.Order;
 
 import Events.EventManager;
 import Events.EventsCenter;
-import Events.MarketDataRequestCompleteEvent;
-import Events.MarketDataRequestEvent;
 import model.ContractWithPriceDetail;
 import model.ListOfUniqueContractList;
 import model.Model;
 import model.UniqueContractList;
-import model.UniqueOrderContractList;
 
 public class LogicManager extends EventManager implements Logic{
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -33,8 +30,6 @@ public class LogicManager extends EventManager implements Logic{
 
     private int requestId = 1;
     private int numberOfSellLimitOrdersSubmitted = 0;
-
-    private int currentNumberOfStockRequests = 0;
 
     public LogicManager(Model modelManager, EClientSocket eClientSocket, EWrapperImplementation eWrapperImplementation) {
         this.model = modelManager;
@@ -61,14 +56,6 @@ public class LogicManager extends EventManager implements Logic{
         EventsCenter.getInstance().registerHandler(handler);
     }
 
-    @Subscribe
-    public void handleMarketDataRequestCompleteEvent(MarketDataRequestCompleteEvent event) {
-        LOGGER.info("MarketDatRequestCompleteEvent handled");
-        cancelRealTimeMarketDataForUniqueContractList(event.getRequestedContractList());
-
-        this.getRealTimeMarketData();
-    }
-
     @Override
     public Parser getParser() {
         return parser;
@@ -89,30 +76,12 @@ public class LogicManager extends EventManager implements Logic{
 
         UniqueContractList contractList = uniqueContractLists.getNextUniqueContractList();
 
-         currentNumberOfStockRequests = contractList.size();
-
-        // sent event to EWrapperImplementation
-        raise(new MarketDataRequestEvent(currentNumberOfStockRequests, contractList));
-
         for (ContractWithPriceDetail contract: contractList.getInternalArray()) {
             setRequestIdForContractWithPriceDetail(requestId, contract);
 
             eClientSocket.reqMktData(requestId, contract, "", false,
                     false, null);
             requestId++;
-        }
-    }
-
-    public void cancelRealTimeMarketDataForUniqueContractList(UniqueContractList uniqueContractList) {
-        for (ContractWithPriceDetail contract : uniqueContractList.getInternalArray()) {
-            // only cancel
-            if (!model.hasSentOrderForContract(contract)) {
-                int requestId = contract.getRequestId();
-                LOGGER.info("=============================[ Cancelling market data for ReqId:" + requestId + " [ " +
-                        contract.symbol() + "] ]=============================");
-
-                eClientSocket.cancelMktData(requestId);
-            }
         }
     }
 
