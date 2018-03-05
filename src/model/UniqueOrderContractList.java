@@ -3,6 +3,9 @@ package model;
 
 import java.util.ArrayList;
 
+import com.ib.client.EWrapper;
+
+import logic.EWrapperImplementation;
 import logic.Logic;
 import model.exceptions.DuplicateContractException;
 import model.exceptions.FullContractListException;
@@ -36,6 +39,13 @@ public class UniqueOrderContractList extends UniqueContractList {
             DuplicateContractException {
         super.addContract(contract);
 
+        // set current OrderId to contract
+        try {
+            contract.setOrderId(EWrapperImplementation.getCurrentOrderId());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         // notify Logic to send order
         newContractAddedNotifyLogicToSendOrder(contract);
 
@@ -50,7 +60,8 @@ public class UniqueOrderContractList extends UniqueContractList {
     private void newContractAddedNotifyLogicToSendOrder (ContractWithPriceDetail contract) {
         // logic must be set up
         assert(logic != null);
-
+        // TODO: change buy order parameters
+        logic.placeLimitBuyOrder(contract, 90, 20);
     }
 
     /**
@@ -75,5 +86,27 @@ public class UniqueOrderContractList extends UniqueContractList {
         for (ContractWithPriceDetail contract: array) {
             System.out.println(contract.symbol());
         }
+    }
+
+    /**
+     * Checks if the orderId is an orderId belonging to a ContractWithPriceDetail in this order list.
+     * @param orderId
+     */
+    public boolean containsOrderId(int orderId) {
+        for (ContractWithPriceDetail contract : getContractArrayWithPriceDetailList()) {
+            if (contract.getOrderId() == orderId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public String retrieveSymbolByOrderId(int orderId) {
+        for (ContractWithPriceDetail contract : getContractArrayWithPriceDetailList()) {
+            if (contract.getOrderId() == orderId) {
+                return contract.symbol();
+            }
+        }
+        return "Unable to retrieve symbol for orderId: " + orderId;
     }
 }
