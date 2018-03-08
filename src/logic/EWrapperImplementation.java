@@ -3,6 +3,7 @@ package logic;
 import java.io.File;
 import java.io.FileWriter;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -225,8 +226,8 @@ public class EWrapperImplementation extends EventManager implements EWrapper {
         String filePath = "/Users/ZengHou/Desktop/submittedOrders.csv";
         try {
             FileWriter fileWriter = new FileWriter(new File(filePath), true);
-            String orderDetail = "Order Id: " + orderId + ", " + symbol + ", Average Filled Price: " +
-                    averageFillPrice + ", Remaining: " + remaining + ", Filled: " + filled + "\n";
+            String orderDetail = "[ " + LocalDateTime.now().toString() + " ]" + "Order Id: " + orderId + ", " + symbol +
+                    ", Average Filled Price: " + averageFillPrice + ", Remaining: " + remaining + ", Filled: " + filled + "\n";
             fileWriter.append(orderDetail);
             fileWriter.flush();
         } catch (Exception e) {
