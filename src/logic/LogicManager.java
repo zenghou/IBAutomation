@@ -85,6 +85,13 @@ public class LogicManager extends EventManager implements Logic{
         }
     }
 
+    public void getRealTimeMarketDataForContract(ContractWithPriceDetail contract) {
+        setRequestIdForContractWithPriceDetail(requestId, contract);
+        eClientSocket.reqMktData(requestId, contract, "", false,
+                false, null);
+        requestId++;
+    }
+
     @Override
     public int getCurrentOrderId() {
         return eWrapperImplementation.getCurrentOrderId();
@@ -121,8 +128,8 @@ public class LogicManager extends EventManager implements Logic{
      */
     private void setRequestIdForContractWithPriceDetail(int reqId, ContractWithPriceDetail contract) {
         try {
-//            LOGGER.info("=============================[ Assigning reqId " + reqId + " to " + contract.symbol() +
-//                    " ]===========================");
+            LOGGER.info("=============================[ Assigning reqId " + reqId + " to " + contract.symbol() +
+                    " ]===========================");
 
             contract.setRequestId(reqId);
         } catch (Exception e) {
@@ -295,12 +302,8 @@ public class LogicManager extends EventManager implements Logic{
     @Override
     public void update(Observable o, Object arg) {
         ContractWithPriceDetail contract = (ContractWithPriceDetail) arg;
-        System.out.println("New contract: " + contract.symbol() + " has been added. No update needed from observer " +
-                "ince the uniqueContractLists are continually being looped");
-//        try {
-//            getRealTimeMarketDataForContract(contract);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+        LOGGER.info("=============================[ New contract [" + contract.symbol() +
+                "] has been added to model. ]=============================");
+        getRealTimeMarketDataForContract(contract);
     }
 }
