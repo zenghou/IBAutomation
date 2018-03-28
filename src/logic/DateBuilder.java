@@ -6,7 +6,7 @@ import java.util.Date;
 /** Returns a Date object at a fixed time for each day */
 public class DateBuilder {
 
-    private static final int HOUR = 04;
+    private static final int HOUR = 03;
     private static final int MINUTE_CANCELLATION = 40;
     private static final int MINUTE_CLOSING = 41;
     private static final int SECOND = 0;
