@@ -72,9 +72,7 @@ public class LogicManager extends EventManager implements Logic{
      */
     @Override
     public void getRealTimeMarketData() {
-        ListOfUniqueContractList uniqueContractLists = model.getUniqueContractLists();
-
-        UniqueContractList contractList = uniqueContractLists.getNextUniqueContractList();
+        UniqueContractList contractList = model.getUniqueContractList();
 
         for (ContractWithPriceDetail contract: contractList.getInternalArray()) {
             setRequestIdForContractWithPriceDetail(requestId, contract);
@@ -104,11 +102,14 @@ public class LogicManager extends EventManager implements Logic{
 
     @Override
     public void cancelRealTimeBarsForContract(ContractWithPriceDetail contract) {
-        int contractRequestId = contract.getRequestId();
-        eClientSocket.cancelRealTimeBars(contractRequestId);
+        // checks if contract belongs to monitored list of contracts before cancelling
+        if (model.getUniqueContractList().containsContract(contract)) {
+            int contractRequestId = contract.getRequestId();
+            eClientSocket.cancelRealTimeBars(contractRequestId);
 
-        LOGGER.info("=============================[ Cancelling realTimeBars for ID:  " + contractRequestId + ", Symbol: " +
-                contract.symbol() + " ]=============================");
+            LOGGER.info("=============================[ Cancelling realTimeBars for ID:  " + contractRequestId + ", Symbol: " +
+                    contract.symbol() + " ]=============================");
+        }
     }
 
     @Override

@@ -10,7 +10,7 @@ import java.util.List;
  */
 public interface Model {
     /** Returns a UniqueContractList object */
-    ListOfUniqueContractList getUniqueContractLists();
+    UniqueContractList getUniqueContractList();
 
     /** Sets up a model with a {@see listOfSymbols} and {@see UniqueContractList} */
     void initializeModel();

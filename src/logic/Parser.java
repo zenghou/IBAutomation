@@ -70,7 +70,9 @@ public class Parser extends TimerTask {
 
             // only add to tickerPriceHashMap if ticker is not already inside
             if (!tickerPriceHashMap.containsKey(ticker)) {
-                tickerPriceHashMap.put(ticker, price);
+                // Don't think we need to add to tickerPriceHashMap since we are immediately ordering the rest of the
+                // tickers that are added to the CSV
+                // tickerPriceHashMap.put(ticker, price);
 
                 model.updateUniqueContractList(ContractBuilder.buildContractWithPriceDetail(ticker, price));
             }

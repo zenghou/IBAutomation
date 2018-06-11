@@ -52,9 +52,10 @@ public class MainApp {
 
         logic = new LogicManager(model, eClientSocket, eWrapper);
 
-        for (UniqueContractList eachList : model.getUniqueContractLists().getArrayList()) {
-            eachList.addObserver(logic);
-        }
+        // no need to add observer since the uniqueContractList will not be updated
+//        for (UniqueContractList eachList : model.getUniqueContractLists().getArrayList()) {
+//            eachList.addObserver(logic);
+//        }
 
         timer = new Timer();
 

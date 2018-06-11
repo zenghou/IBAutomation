@@ -35,7 +35,8 @@ public class UniqueOrderContractList extends UniqueContractList {
      *
      */
     @Override
-    public void addContract(ContractWithPriceDetail contract) throws FullContractListException,
+    public void
+    addContract(ContractWithPriceDetail contract) throws FullContractListException,
             DuplicateContractException {
         super.addContract(contract);
 
@@ -49,7 +50,7 @@ public class UniqueOrderContractList extends UniqueContractList {
         // notify Logic to send order
         newContractAddedNotifyLogicToSendOrder(contract);
 
-        // notify Logic to stop requesting real time bars for contract
+        // notify Logic to stop requesting real time bars for contract only if it is from model's uniqueContractList
         cancelRealTimeMarketDataRequestForContract(contract);
     }
 

@@ -22,7 +22,7 @@ public class UniqueContractList extends Observable {
 
     private final ArrayList <ContractWithPriceDetail> contractWithPriceDetailArrayList;
 
-    // initializes a contractWithPriceDetailArrayList that can hold 1000 contracts
+    // initializes a contractWithPriceDetailArrayList that can hold 80 contracts
     public UniqueContractList() {
         contractWithPriceDetailArrayList = new ArrayList<>(arraySize);
     }
@@ -107,5 +107,14 @@ public class UniqueContractList extends Observable {
 
     public ArrayList<ContractWithPriceDetail> getInternalArray() {
         return this.contractWithPriceDetailArrayList;
+    }
+
+    public ContractWithPriceDetail retrieveContractByRequestId(int requestId) {
+        for (ContractWithPriceDetail contract: this.getContractArrayWithPriceDetailList()) {
+            if (contract.getRequestId() == requestId) {
+                return contract;
+            }
+        }
+        return null;
     }
 }

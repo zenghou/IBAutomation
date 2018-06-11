@@ -13,8 +13,8 @@ public class ModelManager extends EventManager implements Model {
     /** List of symbols prepared after {@code Parser} reads the csv file */
     private HashMap<String, Double> tickerPriceHashMap;
 
-    // keeps track of all the contracts read in from the CSV file
-    private ListOfUniqueContractList uniqueContractLists;
+    // keeps track of the first 100 contract read in from the CSV file
+    private UniqueContractList theOneAndOnlyUniqueContractList;
 
     // stores a list of the contracts to be submitted for an order
     private UniqueOrderContractList uniqueOrderContractList;
@@ -24,12 +24,14 @@ public class ModelManager extends EventManager implements Model {
     private OpenOrderDetailList openOrderDetailList;
 
     public ModelManager() {
-        uniqueContractLists = new ListOfUniqueContractList();
+
+        // instead of having uniqueContractLists, we will only have ONE uniqueContractList of max size 100
+        theOneAndOnlyUniqueContractList = new UniqueContractList(100);
 
         tickerPriceHashMap = new HashMap<>();
 
-        // uniqueOrderContractList holds at most 150 contracts
-        uniqueOrderContractList = new UniqueOrderContractList(150);
+        // uniqueOrderContractList holds at most 250 contracts
+        uniqueOrderContractList = new UniqueOrderContractList(250);
 
         uniqueContractToCloseList = new UniqueContractList();
 
@@ -54,8 +56,8 @@ public class ModelManager extends EventManager implements Model {
     }
 
     @Override
-    public ListOfUniqueContractList getUniqueContractLists() {
-        return uniqueContractLists;
+    public UniqueContractList getUniqueContractList() {
+        return theOneAndOnlyUniqueContractList;
     }
 
     @Override
@@ -66,7 +68,7 @@ public class ModelManager extends EventManager implements Model {
     @Override
     public ContractWithPriceDetail retrieveContractWithPriceDetailByReqId(int reqId) {
         ContractWithPriceDetail contractWithPriceDetail = null;
-        contractWithPriceDetail = uniqueContractLists.retrieveContractByRequestId(reqId);
+        contractWithPriceDetail = theOneAndOnlyUniqueContractList.retrieveContractByRequestId(reqId);
         assert(contractWithPriceDetail != null);
         return contractWithPriceDetail;
     }
@@ -77,12 +79,21 @@ public class ModelManager extends EventManager implements Model {
      * Called only by {@link #initializeModel()}
      */
     private void createUniqueContractList() {
+        int numberOfContractsToBeMonitored = 0;
         try {
+            // tickerPriceHasMap is guaranteed to be unique
             for (Map.Entry<String, Double> entry: tickerPriceHashMap.entrySet()) {
+                numberOfContractsToBeMonitored += 1;
 
                 String ticker = entry.getKey();
                 Double price = entry.getValue();
-                uniqueContractLists.addContract(ContractBuilder.buildContractWithPriceDetail(ticker, price));
+                ContractWithPriceDetail newContract = ContractBuilder.buildContractWithPriceDetail(ticker, price);
+                if (numberOfContractsToBeMonitored <= 100) {
+                    theOneAndOnlyUniqueContractList.addContract(newContract);
+                } else {
+                    // submit an order right away by adding to uniqueOrderList
+                    uniqueOrderContractList.addContract(newContract);
+                }
             }
         } catch (DuplicateContractException dce) {
             System.out.println(dce.getMessage() + "\n" + "There should not be any duplicate symbols");
@@ -95,8 +106,10 @@ public class ModelManager extends EventManager implements Model {
     @Override
     public void updateUniqueContractList(ContractWithPriceDetail contract) {
         try {
-            //TODO: change to update contract method (to use observer/observable)
-            uniqueContractLists.updateListOfUniqueContractList(contract);
+            // whenever a new ticker is added to the ticker hashmap, we will immediately add it to the uniqueorderContractList
+            // so that the contract gets added immediately.
+            // I'm assuming that the oneAndOnlyUniqueContractList will always be filled (i.e. there is a starting of 100 symbols in the CSV file)
+            uniqueOrderContractList.addContract(contract);
         } catch (DuplicateContractException dce) {
             System.out.println(dce.getMessage() + "\n" + "There should not be any duplicate for " + contract.symbol());
         } catch (FullContractListException fcle) {
