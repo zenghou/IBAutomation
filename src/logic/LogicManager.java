@@ -5,7 +5,6 @@ import java.text.DecimalFormat;
 import java.util.Observable;
 import java.util.logging.Logger;
 
-import com.google.common.eventbus.Subscribe;
 import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 import com.ib.client.Order;
@@ -13,7 +12,7 @@ import com.ib.client.Order;
 import Events.EventManager;
 import Events.EventsCenter;
 import model.ContractWithPriceDetail;
-import model.ListOfUniqueContractList;
+
 import model.Model;
 import model.UniqueContractList;
 
@@ -72,7 +71,7 @@ public class LogicManager extends EventManager implements Logic{
      */
     @Override
     public void getRealTimeMarketData() {
-        UniqueContractList contractList = model.getUniqueContractList();
+        UniqueContractList contractList = model.getUniqueContractListToBeMonitored();
 
         for (ContractWithPriceDetail contract: contractList.getInternalArray()) {
             setRequestIdForContractWithPriceDetail(requestId, contract);
@@ -103,7 +102,7 @@ public class LogicManager extends EventManager implements Logic{
     @Override
     public void cancelRealTimeBarsForContract(ContractWithPriceDetail contract) {
         // checks if contract belongs to monitored list of contracts before cancelling
-        if (model.getUniqueContractList().containsContract(contract)) {
+        if (model.getUniqueContractListToBeMonitored().containsContract(contract)) {
             int contractRequestId = contract.getRequestId();
             eClientSocket.cancelRealTimeBars(contractRequestId);
 
@@ -138,6 +137,15 @@ public class LogicManager extends EventManager implements Logic{
                     " ]===========================");
 
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void placeLimitBuyOrderForUnmonitoredContracts() {
+        UniqueContractList unmonitoredContractList = model.getUnmonitoredContractList();
+        for (ContractWithPriceDetail contract : unmonitoredContractList.getInternalArray()) {
+            // updating now basically adds it directly to the uniqueOrderContractList
+            model.addContractToOrderList(contract);
         }
     }
 

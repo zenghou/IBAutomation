@@ -14,7 +14,10 @@ public class ModelManager extends EventManager implements Model {
     private HashMap<String, Double> tickerPriceHashMap;
 
     // keeps track of the first 100 contract read in from the CSV file
-    private UniqueContractList theOneAndOnlyUniqueContractList;
+    private UniqueContractList contractListToBeMonitored;
+
+    // keeps track of the 101th contract and onwards read in from the CSV file
+    private UniqueContractList unmonitoredContractList;
 
     // stores a list of the contracts to be submitted for an order
     private UniqueOrderContractList uniqueOrderContractList;
@@ -23,10 +26,12 @@ public class ModelManager extends EventManager implements Model {
     private SellLimitOrderDetailList sellLimitOrderDetailList;
     private OpenOrderDetailList openOrderDetailList;
 
+
     public ModelManager() {
 
         // instead of having uniqueContractLists, we will only have ONE uniqueContractList of max size 100
-        theOneAndOnlyUniqueContractList = new UniqueContractList(100);
+        contractListToBeMonitored = new UniqueContractList(100);
+        unmonitoredContractList = new UniqueContractList(400);
 
         tickerPriceHashMap = new HashMap<>();
 
@@ -46,7 +51,7 @@ public class ModelManager extends EventManager implements Model {
      */
     @Override
     public void initializeModel() {
-        createUniqueContractList();
+        createUniqueContractLists();
     }
 
     /** Gives {@see Parser} access to tickerPriceHashMap to populate with stock symbols */
@@ -56,9 +61,12 @@ public class ModelManager extends EventManager implements Model {
     }
 
     @Override
-    public UniqueContractList getUniqueContractList() {
-        return theOneAndOnlyUniqueContractList;
+    public UniqueContractList getUniqueContractListToBeMonitored() {
+        return contractListToBeMonitored;
     }
+
+    @Override
+    public UniqueContractList getUnmonitoredContractList() { return unmonitoredContractList; }
 
     @Override
     public UniqueContractList getUniqueContractToCloseList() {
@@ -68,7 +76,7 @@ public class ModelManager extends EventManager implements Model {
     @Override
     public ContractWithPriceDetail retrieveContractWithPriceDetailByReqId(int reqId) {
         ContractWithPriceDetail contractWithPriceDetail = null;
-        contractWithPriceDetail = theOneAndOnlyUniqueContractList.retrieveContractByRequestId(reqId);
+        contractWithPriceDetail = contractListToBeMonitored.retrieveContractByRequestId(reqId);
         assert(contractWithPriceDetail != null);
         return contractWithPriceDetail;
     }
@@ -76,9 +84,10 @@ public class ModelManager extends EventManager implements Model {
     /**
      * Loops through all ticker and price key-value pairs in {@code tickerPriceHashMap}
      * and adds the created {@see ContractWithPriceDetail} object into {@code uniqueOrderContractList}.
+     * First 100 is monitored and remaining stocks are added to a separate unmonitored list.
      * Called only by {@link #initializeModel()}
      */
-    private void createUniqueContractList() {
+    private void createUniqueContractLists() {
         int numberOfContractsToBeMonitored = 0;
         try {
             // tickerPriceHasMap is guaranteed to be unique
@@ -89,10 +98,10 @@ public class ModelManager extends EventManager implements Model {
                 Double price = entry.getValue();
                 ContractWithPriceDetail newContract = ContractBuilder.buildContractWithPriceDetail(ticker, price);
                 if (numberOfContractsToBeMonitored <= 100) {
-                    theOneAndOnlyUniqueContractList.addContract(newContract);
+                    contractListToBeMonitored.addContract(newContract);
                 } else {
-                    // submit an order right away by adding to uniqueOrderList
-                    uniqueOrderContractList.addContract(newContract);
+                    // Add to unmonitoredList
+                    unmonitoredContractList.addContract(newContract);
                 }
             }
         } catch (DuplicateContractException dce) {
@@ -104,7 +113,7 @@ public class ModelManager extends EventManager implements Model {
     }
 
     @Override
-    public void updateUniqueContractList(ContractWithPriceDetail contract) {
+    public void addContractToOrderList(ContractWithPriceDetail contract) {
         try {
             // whenever a new ticker is added to the ticker hashmap, we will immediately add it to the uniqueorderContractList
             // so that the contract gets added immediately.

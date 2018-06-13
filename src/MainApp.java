@@ -44,18 +44,22 @@ public class MainApp {
 
         createNewSubmittedOrdersCsv();
 
+        // model is ready
         model = new ModelManager();
 
         eWrapper = new EWrapperImplementation(model);
         eClientSocket = eWrapper.getClient();
         eReaderSignal = eWrapper.getSignal();
 
+        // logic is not ready yet
+
         logic = new LogicManager(model, eClientSocket, eWrapper);
 
-        // no need to add observer since the uniqueContractList will not be updated
-//        for (UniqueContractList eachList : model.getUniqueContractLists().getArrayList()) {
-//            eachList.addObserver(logic);
-//        }
+        // add observer for contractListToBeMonitored
+        model.getUniqueContractListToBeMonitored().addObserver(logic);
+
+        // call method to check for order batch (for the 100th stock onwards)
+        logic.placeLimitBuyOrderForUnmonitoredContracts();
 
         timer = new Timer();
 

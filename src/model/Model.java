@@ -10,7 +10,7 @@ import java.util.List;
  */
 public interface Model {
     /** Returns a UniqueContractList object */
-    UniqueContractList getUniqueContractList();
+    UniqueContractList getUniqueContractListToBeMonitored();
 
     /** Sets up a model with a {@see listOfSymbols} and {@see UniqueContractList} */
     void initializeModel();
@@ -27,7 +27,7 @@ public interface Model {
     /** Adds a contract that is ready for purchase order to the UniqueOrderContractList */
     void addContractWithPriceDetailToOrderList(ContractWithPriceDetail contractWithPriceDetail);
 
-    void updateUniqueContractList(ContractWithPriceDetail contract);
+    void addContractToOrderList(ContractWithPriceDetail contract);
 
     UniqueContractList getUniqueContractToCloseList();
 
@@ -62,4 +62,6 @@ public interface Model {
     String retrieveSymbolByOrderId(int orderId);
 
     boolean hasSentOrderForContract(ContractWithPriceDetail contractWithPriceDetail);
+
+    UniqueContractList getUnmonitoredContractList();
 }

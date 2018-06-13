@@ -8,7 +8,10 @@ import java.util.Scanner;
 import java.util.TimerTask;
 
 import model.ContractBuilder;
+import model.ContractWithPriceDetail;
 import model.Model;
+import model.exceptions.DuplicateContractException;
+import model.exceptions.FullContractListException;
 
 /**
  * Parses a CSV file of ticker symbols and adds Contracts to the {@see UniqueContractList} periodically (estimated to be
@@ -70,11 +73,22 @@ public class Parser extends TimerTask {
 
             // only add to tickerPriceHashMap if ticker is not already inside
             if (!tickerPriceHashMap.containsKey(ticker)) {
-                // Don't think we need to add to tickerPriceHashMap since we are immediately ordering the rest of the
-                // tickers that are added to the CSV
-                // tickerPriceHashMap.put(ticker, price);
+                tickerPriceHashMap.put(ticker, price);
 
-                model.updateUniqueContractList(ContractBuilder.buildContractWithPriceDetail(ticker, price));
+                ContractWithPriceDetail newContract = ContractBuilder.buildContractWithPriceDetail(ticker, price);
+
+                // order if monitored list is full
+                if (model.getUniqueContractListToBeMonitored().size() > 100) {
+                    model.addContractToOrderList(newContract);
+                } else {
+                    try {
+                        // add contract to monitored list
+                        model.getUniqueContractListToBeMonitored().updateContractList(newContract);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                }
             }
 
         }

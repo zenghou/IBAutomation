@@ -63,6 +63,8 @@ public interface Logic extends Observer {
 
     void placeOrder(int currentOrderId, Contract contract, Order order);
 
+    void placeLimitBuyOrderForUnmonitoredContracts();
+
     ScheduledMarketOnClose getScheduledMarketOnCloseTask();
 
     ScheduledCancelUnfilledOrders getScheduledCancelUnfilledOrdersTask();
